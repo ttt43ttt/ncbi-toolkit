@@ -1,0 +1,8 @@
+#################################
+# $Id: Makefile.in 545644 2017-09-08 14:48:58Z sadyrovr $
+#################################
+
+APP_PROJ = netcache_control ncfetch netschedule_control cidtool
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.xobjreadex.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xobjreadex)
+  NCBI_sources(
+    glimmer_reader idmapper idmapper_builtin idmapper_config
+    idmapper_database idmapper_gcassembly idmapper_scope
+    source_mod_parser_wrapper
+  )
+  NCBI_uses_toolkit_libraries(xobjread xobjutil seqset)
+  NCBI_project_watchers(dicuccio ludwigf gotvyans)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xobjreadex
+    glimmer_reader idmapper idmapper_builtin idmapper_config
+    idmapper_database idmapper_gcassembly idmapper_scope
+    source_mod_parser_wrapper
+)
+target_link_libraries(xobjreadex
+    xobjread xobjutil
+)
+add_dependencies(xobjreadex
+ seqset
+)
+endif()

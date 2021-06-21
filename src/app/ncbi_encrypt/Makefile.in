@@ -1,0 +1,6 @@
+# $Id: Makefile.in 459138 2015-02-13 16:40:54Z grichenk $
+
+APP_PROJ = ncbi_encrypt
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

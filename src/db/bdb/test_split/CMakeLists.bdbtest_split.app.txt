@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.bdbtest_split.app.txt 565521 2018-06-13 13:04:30Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(bdbtest_split)
+  NCBI_sources(test_bdb_split)
+  NCBI_uses_toolkit_libraries(bdb)
+  NCBI_project_watchers(satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(bdbtest_split-app
+    test_bdb_split
+)
+
+set_target_properties(bdbtest_split-app PROPERTIES OUTPUT_NAME bdbtest_split)
+
+include_directories(SYSTEM ${BERKELEYDB_INCLUDE})
+
+target_link_libraries(bdbtest_split-app
+    bdb
+)
+endif()

@@ -1,0 +1,23 @@
+#############################################################################
+# $Id: CMakeLists.lang_query.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(lang_query)
+  NCBI_sources(lang_query)
+  NCBI_uses_toolkit_libraries(dbapi_sample_base)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(lang_query-app
+    lang_query
+)
+
+set_target_properties(lang_query-app PROPERTIES OUTPUT_NAME lang_query)
+
+target_link_libraries(lang_query-app
+    dbapi_sample_base
+)
+endif()

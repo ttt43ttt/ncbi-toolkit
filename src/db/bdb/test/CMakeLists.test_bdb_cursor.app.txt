@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_bdb_cursor.app.txt 565521 2018-06-13 13:04:30Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_bdb_cursor)
+  NCBI_sources(test_bdb_cursor)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(bdb test_boost)
+  NCBI_project_watchers(satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_bdb_cursor-app
+    test_bdb_cursor
+)
+
+set_target_properties(test_bdb_cursor-app PROPERTIES OUTPUT_NAME test_bdb_cursor)
+
+target_link_libraries(test_bdb_cursor-app
+    bdb test_boost
+)
+endif()

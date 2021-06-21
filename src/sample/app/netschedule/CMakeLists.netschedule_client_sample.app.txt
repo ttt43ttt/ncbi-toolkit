@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(netschedule_client_sample-app
+    netschedule_client_sample
+)
+
+set_target_properties(netschedule_client_sample-app PROPERTIES OUTPUT_NAME netschedule_client_sample)
+
+target_link_libraries(netschedule_client_sample-app
+    xconnserv xthrserv xconnect 
+ 
+)
+

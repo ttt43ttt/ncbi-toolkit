@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.demo_contig_assembly.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(demo_contig_assembly)
+  NCBI_sources(demo_contig_assembly)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalgocontig_assembly seq)
+  NCBI_project_watchers(jcherry)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_executable(demo_contig_assembly-app
+    demo_contig_assembly
+)
+
+set_target_properties(demo_contig_assembly-app PROPERTIES OUTPUT_NAME demo_contig_assembly)
+
+target_link_libraries(demo_contig_assembly-app
+    ncbi_xloader_genbank xalgocontig_assembly
+)
+
+add_dependencies(demo_contig_assembly-app
+    seq
+)
+endif()

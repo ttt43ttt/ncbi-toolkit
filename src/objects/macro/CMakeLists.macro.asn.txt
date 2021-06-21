@@ -1,0 +1,34 @@
+#############################################################################
+# $Id: CMakeLists.macro.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(macro)
+  NCBI_dataspecs(macro.asn)
+  NCBI_uses_toolkit_libraries(seq)
+  NCBI_project_watchers(bollin kans)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE macro)
+set(MODULE_IMPORT )
+set(MODULE_PATH )
+
+set(MODULE_EXT "asn")
+add_library(macro ${MODULE}__ ${MODULE}___)
+add_dependencies(macro
+    genome_collection seqset
+)
+
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    seq
+)
+
+target_link_libraries(macro
+    seq
+)
+endif()

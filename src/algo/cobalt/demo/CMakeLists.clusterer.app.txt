@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.clusterer.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(clusterer)
+  NCBI_sources(cobalt_app_util clusterer_app)
+  NCBI_requires(-Cygwin)
+  NCBI_uses_toolkit_libraries(align_format cobalt)
+  NCBI_project_watchers(boratyng)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(clusterer-app
+    cobalt_app_util clusterer_app
+)
+
+set_target_properties(clusterer-app PROPERTIES OUTPUT_NAME clusterer)
+
+target_link_libraries(clusterer-app
+    align_format cobalt
+)
+endif()

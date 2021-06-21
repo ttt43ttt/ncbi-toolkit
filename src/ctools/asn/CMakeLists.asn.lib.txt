@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.asn.lib.txt 564553 2018-05-30 14:04:12Z gouriano $
+#############################################################################
+
+
+NCBI_begin_lib(xasn)
+  NCBI_sources(asnio asnwrite)
+  NCBI_uses_toolkit_libraries(xhtml)
+  NCBI_project_watchers(gouriano)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+
+add_library(xasn
+    asnio asnwrite
+)
+
+target_link_libraries(xasn
+    xhtml ${NCBI_C_ncbi}
+)
+
+if (APPLE)
+   target_link_libraries(xasn -Wl,-framework,ApplicationServices
+                         xhtml
+                        )
+endif (APPLE)
+endif()

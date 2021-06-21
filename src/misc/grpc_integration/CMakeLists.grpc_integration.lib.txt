@@ -1,0 +1,7 @@
+#############################################################################
+# $Id: CMakeLists.grpc_integration.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(grpc_integration)
+  NCBI_sources(grpc_integration)
+NCBI_end_lib()

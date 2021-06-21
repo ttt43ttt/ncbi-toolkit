@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(biosample_chk-app
+    biosample_chk src_table_column
+)
+
+set_target_properties(biosample_chk-app PROPERTIES OUTPUT_NAME biosample_chk)
+
+target_link_libraries(biosample_chk-app
+    ncbi_xloader_genbank ncbi_xloader_wgs xbiosample_util
+)
+

@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.ctl_sp_databases_ftds.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(ctl_sp_databases_ftds)
+  NCBI_sources(ctl_sp_databases_ftds dbapi_driver_sample_base_driver)
+  NCBI_add_definitions(FTDS_IN_USE)
+  NCBI_requires(FreeTDS)
+  NCBI_uses_toolkit_libraries(dbapi xconnext)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ctl_sp_databases_ftds-app
+    ctl_sp_databases_ftds dbapi_driver_sample_base_driver
+)
+
+#doesn't find gssapi_krb5 set_target_properties(ctl_sp_databases_ftds-app PROPERTIES LINK_SEARCH_START_STATIC 1)
+
+set_target_properties(ctl_sp_databases_ftds-app PROPERTIES OUTPUT_NAME ctl_sp_databases_ftds)
+
+include_directories(SYSTEM ${FTDS_INCLUDE})
+
+target_link_libraries(ctl_sp_databases_ftds-app
+    dbapi ncbi_xdbapi_ctlib xconnext
+)
+endif()

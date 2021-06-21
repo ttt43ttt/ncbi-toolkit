@@ -1,0 +1,8 @@
+# $Id: Makefile.in 503534 2016-06-06 14:44:06Z ucko $
+LIB_PROJ = lapackwrapp
+
+REQUIRES = LAPACK
+WATCHERS = ucko
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

@@ -1,0 +1,14 @@
+# $Id: Makefile.in 563023 2018-05-01 14:58:19Z kachalos $
+#
+# Makefile:  for Multipattern Search Code Generator
+# Author: Sema
+#
+
+APP_PROJ = multipattern
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta
+
+REQUIRES = LIBXSLT 
+
+WATCHERS = kachalos

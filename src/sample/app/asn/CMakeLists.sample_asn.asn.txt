@@ -1,0 +1,19 @@
+#
+#
+#
+
+set(MODULE sample_asn)
+set(MODULE_IMPORT objects/general-lib/general)
+set(MODULE_PATH sample/app/asn)
+
+set(MODULE_EXT "asn")
+add_library(sample_asn ${MODULE}__ ${MODULE}___)
+add_dependencies(sample_asn
+    general-lib
+)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    general-lib
+)

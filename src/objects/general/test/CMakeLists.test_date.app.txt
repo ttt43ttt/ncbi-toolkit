@@ -1,0 +1,23 @@
+#############################################################################
+# $Id: CMakeLists.test_date.app.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_date)
+  NCBI_sources(test_date)
+  NCBI_uses_toolkit_libraries(general)
+  NCBI_project_watchers(ucko)
+NCBI_end_app()
+
+
+if(OFF)
+
+add_executable(test_date-app
+    test_date
+)
+
+set_target_properties(test_date-app PROPERTIES OUTPUT_NAME test_date)
+
+target_link_libraries(test_date-app
+    general-lib
+)
+endif()

@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.test_seqport.app.txt 565470 2018-06-12 18:25:37Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_seqport)
+  NCBI_sources(test_seqport)
+  NCBI_uses_toolkit_libraries(seq)
+  NCBI_project_watchers(clausen)
+NCBI_end_app()
+
+
+if(OFF)
+
+add_executable(test_seqport-app
+    test_seqport
+)
+
+set_target_properties(test_seqport-app PROPERTIES OUTPUT_NAME test_seqport)
+
+target_link_libraries(test_seqport-app
+    seq
+)
+endif()
+

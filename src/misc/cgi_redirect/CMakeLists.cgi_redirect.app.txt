@@ -1,0 +1,9 @@
+#############################################################################
+# $Id: CMakeLists.cgi_redirect.app.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(cgi_redirect)
+  NCBI_sources(cgi_redirect)
+  NCBI_uses_toolkit_libraries(xcgi_redirect)
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()

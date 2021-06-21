@@ -1,0 +1,21 @@
+#############################################################################
+# $Id: CMakeLists.xmlreaders.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xmlreaders)
+  NCBI_sources(rfam_tool)
+  NCBI_uses_toolkit_libraries(xmlwrapp)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xmlreaders
+    rfam_tool
+)
+
+target_link_libraries(xmlreaders
+    xmlwrapp
+)
+endif()

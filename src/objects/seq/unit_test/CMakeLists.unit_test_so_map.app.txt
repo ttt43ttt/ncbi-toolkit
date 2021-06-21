@@ -1,0 +1,11 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_so_map.app.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_so_map)
+  NCBI_sources(unit_test_so_map)
+  NCBI_uses_toolkit_libraries(seq test_boost)
+  NCBI_project_watchers(ludwigf)
+  NCBI_add_test()
+NCBI_end_app()
+

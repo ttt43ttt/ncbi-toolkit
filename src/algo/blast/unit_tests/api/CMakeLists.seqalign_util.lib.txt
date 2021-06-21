@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.seqalign_util.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(seqalign_util)
+  NCBI_sources(seqalign_cmp seqalign_set_convert)
+  NCBI_uses_toolkit_libraries(blastdb xnetblast seq)
+  NCBI_project_watchers(camacho madden fongah2)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(seqalign_util
+    seqalign_cmp seqalign_set_convert
+)
+add_dependencies(seqalign_util
+    blastdb xnetblast
+)
+
+target_link_libraries(seqalign_util
+    seq
+)
+endif()

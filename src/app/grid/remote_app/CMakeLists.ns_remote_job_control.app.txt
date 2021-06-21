@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(ns_remote_job_control-app
+    ns_remote_job_control info_collector renderer
+)
+
+set_target_properties(ns_remote_job_control-app PROPERTIES OUTPUT_NAME ns_remote_job_control)
+
+target_link_libraries(ns_remote_job_control-app
+    xconnserv
+)
+

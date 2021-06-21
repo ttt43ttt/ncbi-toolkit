@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.alnvwr.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(alnvwr)
+  NCBI_sources(alnvwrapp)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalnmgr)
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(alnvwr-app
+    alnvwrapp
+)
+
+set_target_properties(alnvwr-app PROPERTIES OUTPUT_NAME alnvwr)
+
+target_link_libraries(alnvwr-app
+    ncbi_xloader_genbank xalnmgr
+)
+endif()

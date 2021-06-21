@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.t0003.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(db100_t0003)
+  NCBI_sources(t0003 common)
+  NCBI_set_test_assets(t0003.sql)
+  NCBI_add_test(test-db100 db100_t0003)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(db100_t0003-app
+    t0003 common
+)
+
+set_target_properties(db100_t0003-app PROPERTIES OUTPUT_NAME db100_t0003)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE})
+
+target_link_libraries(db100_t0003-app
+    sybdb_ftds100 ${FTDS100_CTLIB_LIBS}
+     ${RT_LIBS} ${C_LIBS} 
+)
+endif()

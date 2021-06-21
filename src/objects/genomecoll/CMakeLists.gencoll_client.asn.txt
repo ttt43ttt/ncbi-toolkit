@@ -1,0 +1,37 @@
+#############################################################################
+# $Id: CMakeLists.gencoll_client.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(gencoll_client)
+  NCBI_sources(genomic_collections_cli.cpp ${NCBI_CURRENT_SOURCE_DIR}/genomic_collections_cli_.cpp cached_assembly)
+  set_source_files_properties(${NCBI_CURRENT_SOURCE_DIR}/genomic_collections_cli_.cpp PROPERTIES GENERATED TRUE)
+  NCBI_dataspecs(gencoll_client.asn)
+  NCBI_uses_toolkit_libraries(genome_collection xcompress xconnect)
+  NCBI_project_watchers(shchekot dicuccio zherikov)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE gencoll_client)
+set(MODULE_IMPORT )
+set(MODULE_PATH objects/genomecoll)
+set(MODULE_PATH_RELATIVE objects/genomecoll)
+
+set(MODULE_EXT "asn")
+add_library(gencoll_client ${MODULE}__ ${MODULE}___ genomic_collections_cli genomic_collections_cli_ cached_assembly)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+SET_SOURCE_FILES_PROPERTIES(genomic_collections_cli_ PROPERTIES GENERATED 1)
+SET_TARGET_PROPERTIES(gencoll_client PROPERTIES LINKER_LANGUAGE CXX)
+
+
+target_link_libraries(${MODULE}
+    genome_collection xcompress
+)
+
+target_link_libraries(gencoll_client
+    genome_collection xcompress xconnect
+)
+endif()

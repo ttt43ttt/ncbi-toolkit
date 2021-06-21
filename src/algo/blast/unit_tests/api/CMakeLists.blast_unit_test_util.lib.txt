@@ -1,0 +1,32 @@
+#############################################################################
+# $Id: CMakeLists.blast_unit_test_util.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(blast_unit_test_util)
+  NCBI_sources(test_objmgr blast_test_util)
+  NCBI_uses_toolkit_libraries(
+    blastdb xnetblast
+    blast ncbi_xloader_genbank test_boost
+    xobjutil
+  )
+  NCBI_project_watchers(camacho madden fongah2)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(blast_unit_test_util
+    test_objmgr blast_test_util
+)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../api)
+
+add_dependencies(blast_unit_test_util
+    blastdb xnetblast
+)
+
+target_link_libraries(blast_unit_test_util
+    blast ncbi_xloader_genbank test_boost
+    xobjutil
+)
+endif()

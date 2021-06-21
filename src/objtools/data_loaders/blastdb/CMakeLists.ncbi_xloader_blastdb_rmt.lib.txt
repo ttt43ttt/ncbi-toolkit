@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_xloader_blastdb_rmt.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_xloader_blastdb_rmt)
+  NCBI_sources(bdbloader_rmt remote_blastdb_adapter)
+  NCBI_add_definitions(NCBI_MODULE=BLASTDB)
+  NCBI_uses_toolkit_libraries(blast_services ncbi_xloader_blastdb blastdb xnetblast)
+  NCBI_project_watchers(camacho)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(ncbi_xloader_blastdb_rmt
+    bdbloader_rmt remote_blastdb_adapter
+)
+add_dependencies(ncbi_xloader_blastdb_rmt
+    blastdb xnetblast
+)
+
+target_link_libraries(ncbi_xloader_blastdb_rmt
+    blast_services ncbi_xloader_blastdb
+)
+endif()

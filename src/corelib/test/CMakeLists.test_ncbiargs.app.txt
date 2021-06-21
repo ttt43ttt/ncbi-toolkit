@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_ncbiargs.app.txt 568536 2018-08-07 14:32:35Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_ncbiargs)
+  NCBI_sources(test_ncbiargs)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(gouriano ivanov)
+  NCBI_add_test(test_ncbiargs.sh)
+NCBI_end_app()
+
+if(OFF)
+
+add_executable(test_ncbiargs-app
+    test_ncbiargs
+)
+
+set_target_properties(test_ncbiargs-app PROPERTIES OUTPUT_NAME test_ncbiargs)
+
+target_link_libraries(test_ncbiargs-app
+    xncbi
+)
+
+add_test(NAME test_ncbiargs-app
+         COMMAND $<TARGET_FILE:test_ncbiargs-app>)
+endif()

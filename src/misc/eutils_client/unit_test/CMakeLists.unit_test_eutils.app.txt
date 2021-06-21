@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_eutils.app.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_eutils)
+  NCBI_sources(unit_test_eutils)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(eutils_client test_boost)
+  NCBI_project_watchers(kotliaro)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(unit_test_eutils-app
+    unit_test_eutils
+)
+
+set_target_properties(unit_test_eutils-app PROPERTIES OUTPUT_NAME unit_test_eutils)
+
+
+
+target_link_libraries(unit_test_eutils-app
+    eutils_client test_boost
+)
+endif()

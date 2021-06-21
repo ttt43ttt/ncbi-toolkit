@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.test_seq_entry_ci.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_seq_entry_ci)
+  NCBI_sources(test_seq_entry_ci)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(xobjmgr)
+  NCBI_project_watchers(vasilche grichenk)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_seq_entry_ci-app
+    test_seq_entry_ci
+)
+
+set_target_properties(test_seq_entry_ci-app PROPERTIES OUTPUT_NAME test_seq_entry_ci)
+
+
+target_link_libraries(test_seq_entry_ci-app
+    test_boost xobjmgr
+)
+endif()

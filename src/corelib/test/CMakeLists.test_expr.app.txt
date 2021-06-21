@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_expr.app.txt 568536 2018-08-07 14:32:35Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_expr)
+  NCBI_sources(test_expr)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_add_test()
+  NCBI_project_watchers(vakatov)
+NCBI_end_app()
+
+if(OFF)
+add_executable(test_expr-app
+    test_expr
+)
+
+set_target_properties(test_expr-app PROPERTIES OUTPUT_NAME test_expr)
+
+
+target_link_libraries(test_expr-app
+    test_boost
+)
+
+add_test(NAME test_expr-app
+         COMMAND $<TARGET_FILE:test_expr-app>)
+endif()

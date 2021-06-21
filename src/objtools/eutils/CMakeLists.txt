@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_add_subdirectory(
+  egquery elink epost esearch espell esummary linkout einfo uilist
+  ehistory api
+)
+
+
+if(OFF)
+# Include projects from this directory
+
+# Recurse subdirectories
+add_subdirectory(egquery)
+add_subdirectory(elink)
+add_subdirectory(epost)
+add_subdirectory(esearch)
+add_subdirectory(espell)
+add_subdirectory(esummary)
+add_subdirectory(linkout)
+add_subdirectory(einfo)
+add_subdirectory(uilist)
+add_subdirectory(ehistory)
+add_subdirectory(api)
+endif()

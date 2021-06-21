@@ -1,0 +1,14 @@
+# $Id: Makefile.xalgotext.lib 427427 2014-02-20 13:40:13Z gouriano $
+
+WATCHERS = dicuccio 
+
+LIB = xalgotext
+
+SRC = text_util vector_serial
+
+CXXFLAGS = $(FAST_CXXFLAGS)
+LDFLAGS  = $(FAST_LDFLAGS)
+
+
+USES_LIBRARIES =  \
+    $(COMPRESS_LIBS) xutil

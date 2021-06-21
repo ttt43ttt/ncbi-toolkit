@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_html.app.txt 564553 2018-05-30 14:04:12Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_html)
+  NCBI_sources(test_html)
+  NCBI_uses_toolkit_libraries(xhtml)
+  NCBI_project_watchers(ivanov)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_html-app
+    test_html
+)
+
+set_target_properties(test_html-app PROPERTIES OUTPUT_NAME test_html)
+
+target_link_libraries(test_html-app
+    xhtml
+)
+endif()

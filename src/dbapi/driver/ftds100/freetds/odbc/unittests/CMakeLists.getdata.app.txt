@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.getdata.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_getdata)
+  NCBI_sources(getdata common)
+  NCBI_add_test(test-odbc100 odbc100_getdata)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_getdata-app
+    getdata common
+)
+
+set_target_properties(odbc100_getdata-app PROPERTIES OUTPUT_NAME odbc100_getdata)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_getdata-app
+    odbc_ftds100
+)
+endif()

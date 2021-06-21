@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.earlybind.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_earlybind)
+  NCBI_sources(earlybind common)
+  NCBI_add_test(test-odbc100 odbc100_earlybind)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_earlybind-app
+    earlybind common
+)
+
+set_target_properties(odbc100_earlybind-app PROPERTIES OUTPUT_NAME odbc100_earlybind)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_earlybind-app
+    odbc_ftds100
+)
+endif()

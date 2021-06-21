@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.docsum.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(docsum)
+  NCBI_dataspecs(docsum.asn)
+  NCBI_uses_toolkit_libraries(xser)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE docsum)
+set(MODULE_IMPORT )
+set(MODULE_PATH objects/docsum)
+
+set(MODULE_EXT "asn")
+add_library(docsum ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    xser
+)
+
+target_link_libraries(docsum
+    xser
+)
+endif()

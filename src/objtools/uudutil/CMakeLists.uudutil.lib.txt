@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.uudutil.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(uudutil)
+  NCBI_sources(project_storage)
+  NCBI_uses_toolkit_libraries(gbproj xcompress xconnserv)
+  NCBI_project_watchers(shkeda)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(uudutil
+    project_storage
+)
+include_directories(SYSTEM ${LZO_INCLUDE})
+
+add_dependencies(uudutil
+    gbproj
+)
+
+target_link_libraries(uudutil
+    gbproj xcompress xconnserv
+)
+endif()

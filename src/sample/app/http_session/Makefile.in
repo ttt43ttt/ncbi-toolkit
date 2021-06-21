@@ -1,0 +1,9 @@
+# $Id: Makefile.in 436468 2014-05-28 16:07:44Z grichenk $
+
+# Meta-makefile
+#################################
+
+APP_PROJ = http_session_sample
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

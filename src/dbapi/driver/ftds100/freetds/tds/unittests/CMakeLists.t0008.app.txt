@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.t0008.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(tds100_t0008)
+  NCBI_sources(t0008)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(tds100_t0008-app
+    t0008
+)
+
+set_target_properties(tds100_t0008-app PROPERTIES OUTPUT_NAME tds100_t0008)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE})
+
+target_link_libraries(tds100_t0008-app
+    tds_ftds100
+)
+endif()

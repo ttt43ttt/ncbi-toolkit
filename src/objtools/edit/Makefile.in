@@ -1,0 +1,10 @@
+# $Id: Makefile.in 574790 2018-11-19 16:44:58Z ivanov $
+
+# Meta-makefile (object utilities)
+##################################
+
+LIB_PROJ = edit
+SUB_PROJ = protein_match unit_test
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

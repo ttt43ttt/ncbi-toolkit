@@ -1,0 +1,33 @@
+#############################################################################
+# $Id: CMakeLists.test_ncbidiag_mt.app.txt 568536 2018-08-07 14:32:35Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_ncbidiag_mt)
+  NCBI_sources(test_ncbidiag_mt)
+  NCBI_add_definitions(NCBI_SHOW_FUNCTION_NAME)
+  NCBI_uses_toolkit_libraries(test_mt)
+  NCBI_project_watchers(grichenk)
+
+  NCBI_begin_test(test_ncbidiag_mt_old_fmt)
+    NCBI_set_test_command(test_ncbidiag_mt.sh -format old)
+  NCBI_end_test()
+  NCBI_begin_test(test_ncbidiag_mt_new_fmt)
+    NCBI_set_test_command(test_ncbidiag_mt.sh -format new)
+  NCBI_end_test()
+NCBI_end_app()
+
+if(OFF)
+
+add_executable(test_ncbidiag_mt-app
+    test_ncbidiag_mt
+)
+
+set_target_properties(test_ncbidiag_mt-app PROPERTIES OUTPUT_NAME test_ncbidiag_mt)
+
+target_link_libraries(test_ncbidiag_mt-app
+    test_mt
+)
+
+add_test(NAME test_ncbidiag_mt-app
+         COMMAND $<TARGET_FILE:test_ncbidiag_mt-app>)
+endif()

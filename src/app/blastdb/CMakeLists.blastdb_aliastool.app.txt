@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(blastdb_aliastool-app
+    blastdb_aliastool
+)
+
+set_target_properties(blastdb_aliastool-app PROPERTIES OUTPUT_NAME blastdb_aliastool)
+
+target_link_libraries(blastdb_aliastool-app
+    blastinput writedb
+)
+

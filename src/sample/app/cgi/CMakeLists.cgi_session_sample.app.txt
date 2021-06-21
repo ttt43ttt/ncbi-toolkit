@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(cgi_session_sample.cgi-app
+    cgi_session_sample
+)
+
+set_target_properties(cgi_session_sample.cgi-app PROPERTIES OUTPUT_NAME cgi_session_sample.cgi)
+
+target_link_libraries(cgi_session_sample.cgi-app
+    xgridcgi xcgi xhtml xconnserv xconnect 
+     
+)
+

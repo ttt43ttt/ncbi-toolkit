@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.omssamerge.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(omssamerge)
+  NCBI_sources(omssamerge)
+  NCBI_uses_toolkit_libraries(xomssa)
+  NCBI_project_watchers(lewisg gorelenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(omssamerge-app
+    omssamerge
+)
+
+set_target_properties(omssamerge-app PROPERTIES OUTPUT_NAME omssamerge)
+
+target_link_libraries(omssamerge-app
+    xomssa
+)
+endif()

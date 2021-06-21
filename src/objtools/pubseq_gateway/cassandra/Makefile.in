@@ -1,0 +1,7 @@
+# $Id: Makefile.in 564554 2018-05-30 14:24:10Z saprykin $
+
+LIB_PROJ = psg_cassandra
+SUB_PROJ = test
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

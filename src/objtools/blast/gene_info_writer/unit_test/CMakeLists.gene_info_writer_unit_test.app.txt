@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.gene_info_writer_unit_test.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(gene_info_writer_unit_test)
+  NCBI_sources(gene_info_writer_test)
+  NCBI_uses_toolkit_libraries(gene_info_writer)
+  NCBI_project_watchers(madden camacho)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(gene_info_writer_unit_test-app
+    gene_info_writer_test
+)
+
+set_target_properties(gene_info_writer_unit_test-app PROPERTIES OUTPUT_NAME gene_info_writer_unit_test)
+
+
+
+target_link_libraries(gene_info_writer_unit_test-app
+    gene_info_writer test_boost
+)
+endif()

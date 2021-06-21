@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.eutils_client.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(eutils_client)
+  NCBI_sources(eutils_client)
+  NCBI_uses_toolkit_libraries(seq xmlwrapp)
+  NCBI_project_watchers(grichenk)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(eutils_client
+    eutils_client
+)
+
+target_link_libraries(eutils_client
+    seq xmlwrapp
+)
+endif()

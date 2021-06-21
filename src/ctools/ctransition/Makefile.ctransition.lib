@@ -1,0 +1,9 @@
+# $Id: Makefile.ctransition.lib 551043 2017-11-13 16:51:53Z ivanov $
+
+SRC = ct_ncbierr \
+      ct_ncbimem \
+      ct_ncbistr
+    
+LIB = ctransition
+
+WATCHERS = ivanov

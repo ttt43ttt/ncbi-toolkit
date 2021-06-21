@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.dbsnp_tooltip_service.asn.txt 568192 2018-08-01 12:31:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(dbsnp_tooltip_service)
+  NCBI_dataspecs(dbsnp_tooltip_service.asn)
+  NCBI_uses_toolkit_libraries(general trackmgr)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE dbsnp_tooltip_service)
+set(MODULE_IMPORT )
+set(MODULE_PATH objects/variation_libs/dbsnp/tooltip_service/dbsnp_tooltip_service)
+
+set(MODULE_EXT "asn")
+add_library(dbsnp_tooltip_service ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(dbsnp_tooltip_service
+    general-lib trackmgr
+)
+endif()

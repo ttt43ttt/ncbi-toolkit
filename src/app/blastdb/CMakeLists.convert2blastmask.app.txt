@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(convert2blastmask-app
+    convert2blastmask
+)
+
+set_target_properties(convert2blastmask-app PROPERTIES OUTPUT_NAME convert2blastmask)
+
+target_link_libraries(convert2blastmask-app
+    blast seqmasks_io
+)
+

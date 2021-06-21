@@ -1,0 +1,7 @@
+# $Id: Makefile.in 423816 2014-01-08 19:50:56Z ucko $
+
+LIB_PROJ = xmlreaders
+REQUIRES = LIBXML LIBXSLT
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

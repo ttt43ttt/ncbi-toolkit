@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.clog.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(clog)
+  NCBI_sources(ncbi_c_log)
+  NCBI_uses_external_libraries(${ORIG_LIBS})
+  NCBI_project_watchers(ivanov)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(clog
+    ncbi_c_log
+)
+
+target_link_libraries(clog
+    ${LIBS}
+)
+endif()

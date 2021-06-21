@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_xdbapi_odbc.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_xdbapi_odbc SHARED)
+  NCBI_sources(connection context cursor lang_cmd result rpc odbc_utils)
+  if (WIN32)
+    NCBI_sources(bcp)
+    NCBI_add_definitions(UCS2 NCBI_DBAPIDRIVER_ODBC_EXPORTS)
+  endif()
+  NCBI_uses_toolkit_libraries(dbapi_driver)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(ncbi_xdbapi_odbc
+    connection context cursor lang_cmd result rpc odbc_utils
+)
+include_directories(SYSTEM ${ODBC_INCLUDE})
+
+target_link_libraries(ncbi_xdbapi_odbc
+    dbapi_driver ${ODBC_LIBS}
+)
+endif()

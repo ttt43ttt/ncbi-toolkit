@@ -1,0 +1,76 @@
+#
+# $Id: Makefile.protobuf.in 568725 2018-08-09 18:31:01Z ucko $
+#
+# Generate source and header files from protobuf spec, typically for
+# use with gRPC.
+#
+# (NOTE: hard-wired for the C++ Toolkit directory structure.)
+#
+
+-include $(builddir)/Makefile.mk
+
+SRCDIR = $(top_srcdir)/src/$(MODULE_PATH)
+INCLUDEDIR = $(top_srcdir)/include/$(MODULE_PATH)
+
+SPEC = $(MODULE_ASN) # sic
+FILES = $(MODULE).files
+IMPDIRS = $(dir $(IMPFILES))
+PROTOC_FLAGS = $(IMPDIRS:%=-I%)
+comma = ,
+PROTO_PATH = .:$(subst $(comma),:,$(MODULE_SEARCH))
+
+PROTOBUF_BIN = @PROTOBUF_BIN@
+GRPC_BIN = @GRPC_BIN@
+PROTOC = $(PROTOBUF_BIN)/protoc
+GRPC_CPP_PLUGIN = $(GRPC_BIN)/grpc_cpp_plugin
+
+ifneq "" "$(wildcard $(GRPC_CPP_PLUGIN))"
+  GRPC_FILES = $(MODULE).grpc.pb.cc $(INCLUDEDIR)/$(MODULE).grpc.pb.hpp \
+               $(INCLUDEDIR)/$(MODULE).grpc.pb.h
+endif
+
+DEPS = $(SPEC) $(PROTOC) $(MODULE).module $(IMPDEPS)
+
+all: sources
+
+all_files: sources
+
+sources: $(FILES)
+
+clean_sources:
+	-$(RM) $(FILES) *.pb.cpp *.pb.h
+
+purge_sources:
+	-$(RM) $(FILES) *.pb.[ch]* $(INCLUDEDIR)/*.pb.h*
+
+purge_all_sources:
+	-$(RM) $(FILES) *.pb.[ch]* $(INCLUDEDIR)/*.pb.h*
+
+purge_all_files:
+	-$(RM) $(FILES) *.pb.[ch]* $(INCLUDEDIR)/*.pb.h*
+
+$(FILES): $(MODULE).pb.cc $(INCLUDEDIR)/$(MODULE).pb.hpp \
+          $(INCLUDEDIR)/$(MODULE).pb.h $(GRPC_FILES)
+	$(RM) $(MODULE).pb.cpp $(MODULE).grpc.pb.cpp
+	@$(TOUCH) $@
+
+$(MODULE).pb.cc $(MODULE).pb.h: $(DEPS)
+	$(PROTOC) $(PROTOC_FLAGS) --cpp_out=. $(SPEC)
+
+$(MODULE).grpc.pb.cc $(MODULE).grpc.pb.h: $(DEPS) $(GRPC_CPP_PLUGIN)
+	$(PROTOC) $(PROTOC_FLAGS) --grpc_out=. --proto_path=$(PROTO_PATH) \
+	    --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) $(SPEC)
+
+$(INCLUDEDIR)/%.pb.h: %.pb.cc # not .h, to avoid duplicate protoc runs
+	$(MKDIR) -p $(INCLUDEDIR)
+	/bin/mv -f $*.pb.h $@
+
+$(INCLUDEDIR)/%.pb.hpp: $(INCLUDEDIR)/%.pb.h
+	@echo '#warning "*.pb.hpp headers are deprecated,"' > $@.tmp
+	@echo '#warning "and available only on Linux."' >> $@.tmp
+	@echo '#warning "Please substitute *.pb.h."' >> $@.tmp
+	echo '#include "$*.pb.h"' >> $@.tmp
+	mv $@.tmp $@
+
+$(MODULE).module:
+	@$(TOUCH) $@

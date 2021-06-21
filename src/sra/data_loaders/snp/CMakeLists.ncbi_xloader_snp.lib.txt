@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_xloader_snp.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_xloader_snp SHARED)
+  NCBI_sources(snploader snploader_impl)
+  NCBI_add_definitions(NCBI_XLOADER_SNP_EXPORTS)
+  NCBI_uses_toolkit_libraries(sraread seqset seq)
+  NCBI_project_watchers(vasilche)
+NCBI_end_lib()
+
+if(OFF)
+add_library(ncbi_xloader_snp snploader snploader_impl)
+
+add_dependencies(ncbi_xloader_snp
+    seqset seq
+)
+
+target_link_libraries(ncbi_xloader_snp
+    sraread
+)
+
+include_directories(SYSTEM ${SRA_INCLUDE})
+add_definitions(-DNCBI_XLOADER_SNP_EXPORTS)
+endif()

@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.sequtil.lib.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(sequtil)
+  NCBI_sources(sequtil sequtil_convert sequtil_convert_imp sequtil_manip sequtil_tables sequtil_shared)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(grichenk ucko)
+NCBI_end_lib()
+
+if (OFF)
+#
+#
+add_library(sequtil
+    sequtil sequtil_convert sequtil_convert_imp sequtil_manip sequtil_tables
+    sequtil_shared
+)
+
+target_link_libraries(sequtil
+    xncbi
+)
+endif()

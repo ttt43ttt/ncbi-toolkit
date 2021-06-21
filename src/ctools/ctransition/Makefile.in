@@ -1,0 +1,7 @@
+# $Id: Makefile.in 551043 2017-11-13 16:51:53Z ivanov $
+
+LIB_PROJ = ctransition ctransition_nlmzip
+SUB_PROJ = test
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.xdiff.lib.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xdiff)
+  NCBI_sources(diff)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(ivanov)
+NCBI_end_lib()
+
+
+if(OFF)
+#
+#
+add_library(xdiff
+    diff
+)
+
+target_link_libraries(xdiff
+    xncbi
+)
+endif()

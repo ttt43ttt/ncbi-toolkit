@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(bss_info-app
+    bss_info
+)
+
+set_target_properties(bss_info-app PROPERTIES OUTPUT_NAME bss_info)
+
+target_link_libraries(bss_info-app
+    seqset 
+)
+

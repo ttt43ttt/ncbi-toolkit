@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.blobrwd.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(blobrwd)
+  NCBI_sources(blobrwd)
+  NCBI_uses_toolkit_libraries(dbapi_util_blobstore)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(blobrwd-app
+    blobrwd
+)
+
+set_target_properties(blobrwd-app PROPERTIES OUTPUT_NAME blobrwd)
+
+include_directories(SYSTEM ${CMPRS_INCLUDE})
+
+target_link_libraries(blobrwd-app
+    dbapi_util_blobstore
+)
+endif()
+

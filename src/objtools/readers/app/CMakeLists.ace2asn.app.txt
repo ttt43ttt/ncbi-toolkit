@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.ace2asn.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(ace2asn)
+  NCBI_sources(ace2asn)
+  NCBI_uses_toolkit_libraries(xobjread)
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ace2asn-app
+    ace2asn
+)
+
+set_target_properties(ace2asn-app PROPERTIES OUTPUT_NAME ace2asn)
+
+target_link_libraries(ace2asn-app
+    xobjread
+)
+endif()

@@ -1,0 +1,12 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_gap_trim.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_gap_trim)
+  NCBI_sources(unit_test_gap_trim)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(xobjedit xunittestutil)
+  NCBI_add_test()
+  NCBI_project_watchers(bollin kans)
+NCBI_end_app()
+

@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.t0012.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(db95_t0012)
+  NCBI_sources(t0012 common)
+  NCBI_set_test_assets(t0012.sql)
+  NCBI_add_test(test-db95 db95_t0012)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(db95_t0012-app
+    t0012 common
+)
+
+set_target_properties(db95_t0012-app PROPERTIES OUTPUT_NAME db95_t0012)
+
+include_directories(SYSTEM ${FTDS95_INCLUDE})
+
+target_link_libraries(db95_t0012-app
+    sybdb_ftds95 ${FTDS95_CTLIB_LIBS}
+     ${RT_LIBS} ${C_LIBS} 
+)
+endif()

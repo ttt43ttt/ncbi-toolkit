@@ -1,0 +1,12 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_gff3reader_genbank.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_gff3reader_genbank)
+  NCBI_sources(unit_test_gff3reader_genbank)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(xobjread)
+  NCBI_project_watchers(ludwigf)
+  NCBI_add_test()
+NCBI_end_app()
+

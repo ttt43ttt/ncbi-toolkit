@@ -1,0 +1,14 @@
+# $Id: Makefile.psg_client.lib 558543 2018-02-27 21:26:26Z vakatov $
+
+ASN_DEP = id2
+
+SRC = psg_client HttpClientTransport
+
+LIB = psg_client
+
+LIBS = $(PSG_RPC_LIBS)
+CPPFLAGS= $(ORIG_CPPFLAGS) $(PSG_RPC_INCLUDE)
+
+WATCHERS = sadyrovr dmitrie1
+
+USES_LIBRARIES = psg_rpc

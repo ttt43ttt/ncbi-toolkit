@@ -1,0 +1,10 @@
+#
+#
+#
+add_library(basic_sample_lib
+    basic_sample_lib
+)
+
+target_link_libraries(basic_sample_lib
+    xncbi
+)

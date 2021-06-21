@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.mysql_lang.app.txt 567009 2018-07-11 16:34:30Z dicuccio $
+#############################################################################
+
+NCBI_begin_app(mysql_lang)
+  NCBI_sources(mysql_lang)
+  NCBI_uses_toolkit_libraries(ncbi_xdbapi_mysql xconnext)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(mysql_lang-app
+    mysql_lang
+)
+
+set_target_properties(mysql_lang-app PROPERTIES OUTPUT_NAME mysql_lang)
+
+include_directories(SYSTEM ${MYSQL_INCLUDE} ${Z_INCLUDE})
+
+target_link_libraries(mysql_lang-app
+    ncbi_xdbapi_mysql xconnext
+)
+endif()

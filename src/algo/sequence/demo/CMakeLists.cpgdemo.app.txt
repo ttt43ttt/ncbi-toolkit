@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.cpgdemo.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(cpgdemo)
+  NCBI_sources(cpgdemo)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalgoseq)
+  NCBI_project_watchers(kskatz)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(cpgdemo-app
+    cpgdemo
+)
+
+set_target_properties(cpgdemo-app PROPERTIES OUTPUT_NAME cpgdemo)
+
+target_link_libraries(cpgdemo-app
+    ncbi_xloader_genbank xalgoseq
+)
+endif()

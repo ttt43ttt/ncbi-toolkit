@@ -1,0 +1,12 @@
+# $Id: Makefile.eutils_client.lib 511731 2016-08-23 22:56:01Z perkovan $
+
+LIB = eutils_client
+SRC = eutils_client
+
+ASN_DEP = seq
+
+DLL_LIB = xmlwrapp
+
+WATCHERS = grichenk
+
+USES_LIBRARIES = xconnect xmlwrapp

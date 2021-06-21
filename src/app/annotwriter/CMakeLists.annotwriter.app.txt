@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(annotwriter-app
+    annotwriter
+)
+
+set_target_properties(annotwriter-app PROPERTIES OUTPUT_NAME annotwriter)
+
+target_link_libraries(annotwriter-app
+    ncbi_xloader_genbank xobjwrite
+)
+

@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.test_floating_point_comparison.app.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_floating_point_comparison)
+  NCBI_sources(test_floating_point_comparison)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(test_boost)
+  NCBI_project_watchers(satskyse)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_floating_point_comparison-app
+    test_floating_point_comparison
+)
+
+set_target_properties(test_floating_point_comparison-app PROPERTIES OUTPUT_NAME test_floating_point_comparison)
+
+
+target_link_libraries(test_floating_point_comparison-app
+    test_boost
+)
+endif()

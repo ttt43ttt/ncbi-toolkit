@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.closestmt.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_closestmt)
+  NCBI_sources(closestmt common)
+  NCBI_add_test(test-odbc100 odbc100_closestmt)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_closestmt-app
+    closestmt common
+)
+
+set_target_properties(odbc100_closestmt-app PROPERTIES OUTPUT_NAME odbc100_closestmt)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_closestmt-app
+    odbc_ftds100
+)
+endif()

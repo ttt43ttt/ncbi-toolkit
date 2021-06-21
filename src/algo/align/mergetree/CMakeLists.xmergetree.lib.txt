@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.xmergetree.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xmergetree)
+  NCBI_sources(merge_tree merge_tree_core equiv_range)
+  NCBI_uses_toolkit_libraries(xobjmgr genome_collection seqset)
+  NCBI_project_watchers(boukn)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xmergetree
+    merge_tree merge_tree_core equiv_range
+)
+add_dependencies(xmergetree
+    genome_collection seqset
+)
+
+target_link_libraries(xmergetree
+    xobjmgr
+)
+endif()

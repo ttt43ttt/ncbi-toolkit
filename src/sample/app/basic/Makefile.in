@@ -1,0 +1,9 @@
+# $Id: Makefile.in 501452 2016-05-16 15:10:32Z elisovdn $
+
+# Meta-makefile
+#################################
+
+APP_PROJ = basic_sample
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

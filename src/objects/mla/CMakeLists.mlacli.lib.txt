@@ -1,0 +1,20 @@
+#############################################################################
+# $Id: CMakeLists.mlacli.lib.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(mlacli)
+  NCBI_sources(mla_client.cpp ${NCBI_CURRENT_SOURCE_DIR}/mla_client_.cpp)
+  set_source_files_properties(${NCBI_CURRENT_SOURCE_DIR}/mla_client_.cpp PROPERTIES GENERATED TRUE)
+  NCBI_uses_toolkit_libraries(mla xconnect)
+NCBI_end_lib()
+
+
+if(OFF)
+add_library(mlacli
+    mla_client mla_client_
+)
+
+target_link_libraries(mlacli
+    mla xconnect
+)
+endif()

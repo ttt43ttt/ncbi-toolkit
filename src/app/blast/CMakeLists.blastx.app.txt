@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(blastx-app
+    blastx_app
+)
+
+set_target_properties(blastx-app PROPERTIES OUTPUT_NAME blastx)
+
+target_link_libraries(blastx-app
+    blast_app_util
+)
+

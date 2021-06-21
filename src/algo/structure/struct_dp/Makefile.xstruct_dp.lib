@@ -1,0 +1,15 @@
+# $Id: Makefile.xstruct_dp.lib 420405 2013-12-03 17:38:27Z gouriano $
+# Author:  Paul Thiessen
+
+# Build library "xstruct_dp"
+#################################
+
+WATCHERS = thiessen
+
+SRC = block_align
+
+LIB = xstruct_dp
+
+
+USES_LIBRARIES =  \
+    xncbi

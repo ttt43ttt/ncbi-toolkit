@@ -1,0 +1,8 @@
+# $Id: Makefile.in 551043 2017-11-13 16:51:53Z ivanov $
+
+APP_PROJ = test_ctransition test_ctransition_nlmzip
+
+PROJ_TAG = test
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

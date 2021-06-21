@@ -1,0 +1,33 @@
+#############################################################################
+# $Id: CMakeLists.elink.asn.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(elink)
+  NCBI_dataspecs(elink.dtd)
+  NCBI_uses_toolkit_libraries(xser)
+  NCBI_project_watchers(grichenk)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+
+set(MODULE elink)
+set(MODULE_IMPORT )
+set(MODULE_PATH )
+
+set(MODULE_EXT "dtd")
+add_library(elink ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    xser
+)
+
+
+target_link_libraries(elink
+    xser
+)
+endif()

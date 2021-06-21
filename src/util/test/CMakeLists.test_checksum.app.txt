@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.test_checksum.app.txt 573332 2018-10-25 17:26:22Z ivanov $
+#############################################################################
+
+
+NCBI_begin_app(test_checksum)
+  NCBI_sources(test_checksum)
+  NCBI_uses_toolkit_libraries(xutil)
+  NCBI_set_test_assets(test_data)
+  NCBI_add_test(test_checksum -selftest)
+  NCBI_project_watchers(vasilche ivanov)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_checksum-app
+    test_checksum
+)
+
+set_target_properties(test_checksum-app PROPERTIES OUTPUT_NAME test_checksum)
+
+target_link_libraries(test_checksum-app
+    xutil
+)
+endif()

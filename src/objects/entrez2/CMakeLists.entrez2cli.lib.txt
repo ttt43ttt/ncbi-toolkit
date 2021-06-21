@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.entrez2cli.lib.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(entrez2cli)
+  NCBI_sources(entrez2_client.cpp ${NCBI_CURRENT_SOURCE_DIR}/entrez2_client_.cpp)
+  set_source_files_properties(${NCBI_CURRENT_SOURCE_DIR}/entrez2_client_.cpp PROPERTIES GENERATED TRUE)
+  NCBI_uses_toolkit_libraries(entrez2 xconnect)
+  NCBI_project_watchers(lavr)
+NCBI_end_lib()
+
+
+if(OFF)
+#
+add_library(entrez2cli
+    entrez2_client entrez2_client_
+)
+
+target_link_libraries(entrez2cli
+    entrez2 xconnect
+)
+endif()

@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.test_chainer.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_chainer)
+  NCBI_sources(test_chainer)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(xalgognomon)
+  NCBI_project_watchers(chetvern)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_chainer-app
+    test_chainer
+)
+
+set_target_properties(test_chainer-app PROPERTIES OUTPUT_NAME test_chainer)
+
+
+target_link_libraries(test_chainer-app
+    test_boost xalgognomon
+)
+endif()

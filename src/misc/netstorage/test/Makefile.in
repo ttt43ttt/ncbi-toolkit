@@ -1,0 +1,12 @@
+# $Id: Makefile.in 545644 2017-09-08 14:48:58Z sadyrovr $
+# Author: Dmitry Kazimirov
+
+# Test suite for "netstorage" library.
+
+LIB_PROJ =
+
+APP_PROJ = test_netstorage
+PROJ_TAG = test,grid
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

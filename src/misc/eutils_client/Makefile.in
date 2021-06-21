@@ -1,0 +1,13 @@
+# $Id: Makefile.in 580975 2019-02-22 21:33:56Z fukanchi $
+
+# Meta-makefile ("misc/eutils_client" project)
+############################################
+
+LIB_PROJ = eutils_client
+
+SUB_PROJ = test unit_test
+
+REQUIRES = LIBXSLT
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

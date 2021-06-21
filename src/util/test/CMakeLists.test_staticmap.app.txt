@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_staticmap.app.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_staticmap)
+  NCBI_sources(test_staticmap)
+  NCBI_uses_toolkit_libraries(xutil)
+  NCBI_project_watchers(vasilche)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_staticmap-app
+    test_staticmap
+)
+
+set_target_properties(test_staticmap-app PROPERTIES OUTPUT_NAME test_staticmap)
+
+target_link_libraries(test_staticmap-app
+    xutil
+)
+endif()

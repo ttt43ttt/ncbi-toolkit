@@ -1,0 +1,14 @@
+# $Id: Makefile.tds64.lib 553128 2017-12-13 16:54:04Z satskyse $
+
+LIB = tds_ftds64
+SRC = challenge config convert data des getmac iconv locale login md4 md5 mem net \
+      numeric query read tdsstring threadsafe token util vstrbuild write \
+      tds_checks replacements hmac_md5 gssapi sspi
+
+CPPFLAGS = -D_FREETDS_LIBRARY_SOURCE -DHAVE_CONFIG_H=1 $(FTDS64_INCLUDE) $(ORIG_CPPFLAGS)
+LIBS    = $(FTDS64_LIBS) $(NETWORK_LIBS) $(C_LIBS)
+LINK    = $(C_LINK)
+
+WATCHERS = ucko satskyse
+
+USES_LIBRARIES = $(FTDS64_LIBS) $(NETWORK_LIBS) $(C_LIBS)

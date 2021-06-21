@@ -1,0 +1,9 @@
+# $Id: Makefile.in 568382 2018-08-03 15:35:36Z dmitrie1 $
+
+SUB_PROJ = diag rpc cassandra client cassandra_old
+EXPENDABLE_SUB_PROJ = protobuf cache
+
+REQUIRES = MT LIBUV NGHTTP2 CASSANDRA
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

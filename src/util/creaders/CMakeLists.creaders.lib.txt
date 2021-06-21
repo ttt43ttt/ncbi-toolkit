@@ -1,0 +1,18 @@
+#############################################################################
+# $Id: CMakeLists.creaders.lib.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(creaders)
+  NCBI_sources(alnread)
+  NCBI_disable_pch()
+  NCBI_project_watchers(bollin)
+NCBI_end_lib()
+
+if (OFF)
+#
+#
+#
+add_library(creaders
+    alnread
+)
+endif()

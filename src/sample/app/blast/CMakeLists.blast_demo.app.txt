@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(blast_demo-app
+    blast_demo
+)
+
+set_target_properties(blast_demo-app PROPERTIES OUTPUT_NAME blast_demo)
+
+target_link_libraries(blast_demo-app
+    ${BLAST_INPUT_LIBS} ncbi_xloader_blastdb_rmt ${BLAST_LIBS}
+    ${OBJMGR_LIBS}  
+)
+

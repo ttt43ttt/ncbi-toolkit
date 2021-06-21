@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.objcoords.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(objcoords)
+  NCBI_dataspecs(objcoords.asn)
+  NCBI_uses_toolkit_libraries(xser)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE objcoords)
+set(MODULE_IMPORT )
+set(MODULE_PATH )
+set(MODULE_PATH_RELATIVE "objects/coords")
+
+set(MODULE_EXT "asn")
+add_library(objcoords ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    xser
+)
+
+target_link_libraries(objcoords
+    xser
+)
+endif()

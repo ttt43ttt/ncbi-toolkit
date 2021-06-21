@@ -1,0 +1,11 @@
+# $Id: Makefile.basic_sample_lib.lib 420289 2013-12-03 17:29:17Z gouriano $
+
+LIB = basic_sample_lib
+SRC = basic_sample_lib
+
+
+WATCHERS = gouriano
+
+
+USES_LIBRARIES =  \
+    xncbi

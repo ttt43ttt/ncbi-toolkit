@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.dbapi_driver_test_ftds_ctlib.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(dbapi_driver_test_ftds_ctlib)
+  NCBI_sources(dbapi_driver_test_ftds_ctlib)
+  NCBI_requires(FreeTDS Sybase)
+  NCBI_uses_toolkit_libraries(dbapi)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(dbapi_driver_test_ftds_ctlib-app
+    dbapi_driver_test_ftds_ctlib
+)
+
+set_target_properties(dbapi_driver_test_ftds_ctlib-app PROPERTIES OUTPUT_NAME dbapi_driver_test_ftds_ctlib)
+
+target_link_libraries(dbapi_driver_test_ftds_ctlib-app
+    dbapi ncbi_xdbapi_ctlib ncbi_xdbapi_ftds
+)
+endif()

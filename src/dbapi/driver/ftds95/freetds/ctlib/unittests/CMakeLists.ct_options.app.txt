@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.ct_options.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(ct95_ct_options)
+  NCBI_sources(ct_options common)
+  NCBI_add_test(test-ct95 ct95_ct_options)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ct95_ct_options-app
+    ct_options common
+)
+
+set_target_properties(ct95_ct_options-app PROPERTIES OUTPUT_NAME ct95_ct_options)
+
+include_directories(SYSTEM ${FTDS95_INCLUDE})
+
+target_link_libraries(ct95_ct_options-app
+    ct_ftds95
+)
+endif()

@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.collection_scores_unit_test.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(collection_scores_unit_test)
+  NCBI_sources(collection_scores_unit_test)
+  NCBI_uses_toolkit_libraries(xalgoalignutil)
+  NCBI_project_watchers(kotliaro)
+  NCBI_add_test(collection_scores_unit_test -input-binary -seq-entry data/collection_score_entries.asnb -aligns data/collection_score_blast.asnb)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(collection_scores_unit_test-app
+    collection_scores_unit_test
+)
+
+set_target_properties(collection_scores_unit_test-app PROPERTIES OUTPUT_NAME collection_scores_unit_test)
+
+
+
+target_link_libraries(collection_scores_unit_test-app
+    test_boost xalgoalignutil
+)
+endif()

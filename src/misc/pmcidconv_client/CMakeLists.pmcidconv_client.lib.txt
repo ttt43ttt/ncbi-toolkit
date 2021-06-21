@@ -1,0 +1,21 @@
+#############################################################################
+# $Id: CMakeLists.pmcidconv_client.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(pmcidconv_client)
+  NCBI_sources(pmcidconv_client)
+  NCBI_uses_toolkit_libraries(xmlwrapp)
+  NCBI_project_watchers(bollin)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(pmdidconv_client
+    pmdidconv_client
+)
+target_link_libraries(pmdidconv_client
+    xmlwrapp
+)
+endif()

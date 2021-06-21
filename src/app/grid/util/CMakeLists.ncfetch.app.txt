@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(ncfetch.cgi-app
+    ncfetch
+)
+
+set_target_properties(ncfetch.cgi-app PROPERTIES OUTPUT_NAME ncfetch.cgi)
+
+target_link_libraries(ncfetch.cgi-app
+    xcgi xconnserv
+)
+

@@ -1,0 +1,12 @@
+# $Id: Makefile.in 542148 2017-07-27 00:57:21Z ucko $
+
+# Meta-makefile ("misc/grpc_integration" project)
+#################################################
+
+LIB_PROJ = grpc_integration
+
+REQUIRES = GRPC
+WATCHERS = ucko
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

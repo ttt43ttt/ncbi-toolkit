@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.blast_services.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(blast_services)
+  NCBI_sources(blast_services)
+  NCBI_uses_toolkit_libraries(xnetblastcli xnetblast)
+  NCBI_project_watchers(madden camacho)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(blast_services
+    blast_services
+)
+add_dependencies(blast_services
+    xnetblast
+)
+
+target_link_libraries(blast_services
+    xnetblastcli
+)
+endif()

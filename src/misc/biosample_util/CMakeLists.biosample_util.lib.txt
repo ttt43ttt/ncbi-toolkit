@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.biosample_util.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xbiosample_util)
+  NCBI_sources(biosample_util struc_table_column)
+  NCBI_uses_toolkit_libraries(
+    xmlwrapp xobjedit
+    taxon3 seqset macro valid
+  )
+  NCBI_project_watchers(bollin)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xbiosample_util
+    biosample_util struc_table_column
+)
+add_dependencies(xbiosample_util
+    taxon3 seqset macro valid
+)
+
+target_link_libraries(xbiosample_util
+    xmlwrapp xobjedit
+)
+endif()

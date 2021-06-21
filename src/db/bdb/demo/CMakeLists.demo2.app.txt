@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.demo2.app.txt 565521 2018-06-13 13:04:30Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(bdb_demo2)
+  NCBI_sources(demo2)
+  NCBI_uses_toolkit_libraries(bdb)
+  NCBI_project_watchers(kuznets)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(bdb_demo2-app
+    demo2
+)
+
+set_target_properties(bdb_demo2-app PROPERTIES OUTPUT_NAME bdb_demo2)
+
+include_directories(SYSTEM ${BERKELEYDB_INCLUDE})
+
+target_link_libraries(bdb_demo2-app
+    bdb
+)
+endif()

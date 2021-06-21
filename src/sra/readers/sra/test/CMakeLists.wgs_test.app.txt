@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.wgs_test.app.txt 566851 2018-07-09 15:25:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(wgs_test)
+  NCBI_sources(wgs_test)
+  NCBI_uses_toolkit_libraries(sraread)
+  NCBI_project_watchers(vasilche ucko)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(wgs_test-app
+    wgs_test
+)
+
+set_target_properties(wgs_test-app PROPERTIES OUTPUT_NAME wgs_test)
+
+include_directories(SYSTEM ${SRA_INCLUDE})
+
+target_link_libraries(wgs_test-app
+    sraread
+)
+endif()

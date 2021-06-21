@@ -1,0 +1,81 @@
+#############################################################################
+# $Id: CMakeLists.txt 564453 2018-05-29 13:28:08Z gouriano $
+#############################################################################
+
+#
+# The connect library uses a split between a shared C toolkit library and an
+# independent C++ toolkit library
+# These variables capture the split
+
+if (UNIX)
+    set(os_src ${LOCAL_LBSM})
+elseif (WIN32)
+    set(os_src ncbi_lbsmd_stub ncbi_strerror)
+endif()
+
+
+set(SRC_TLS
+    ncbi_gnutls ncbi_mbedtls ncbi_tls
+    mbedtls/aes mbedtls/aesni mbedtls/arc4 mbedtls/asn1parse
+    mbedtls/asn1write mbedtls/base64 mbedtls/bignum mbedtls/blowfish
+    mbedtls/camellia mbedtls/ccm mbedtls/cipher mbedtls/cipher_wrap
+    mbedtls/cmac mbedtls/ctr_drbg mbedtls/des mbedtls/dhm mbedtls/ecdh
+    mbedtls/ecdsa mbedtls/ecjpake mbedtls/ecp mbedtls/ecp_curves
+    mbedtls/entropy mbedtls/entropy_poll mbedtls/error mbedtls/gcm
+    mbedtls/havege mbedtls/hmac_drbg mbedtls/md mbedtls/md2
+    mbedtls/md4 mbedtls/mbedtls_md5 mbedtls/md_wrap
+    mbedtls/memory_buffer_alloc mbedtls/oid mbedtls/padlock
+    mbedtls/pem mbedtls/pk mbedtls/pk_wrap mbedtls/pkcs12
+    mbedtls/pkcs5 mbedtls/pkparse mbedtls/pkwrite mbedtls/platform
+    mbedtls/ripemd160 mbedtls/rsa mbedtls/sha1 mbedtls/sha256
+    mbedtls/sha512 mbedtls/threading mbedtls/timing
+    mbedtls/mbedtls_version mbedtls/version_features mbedtls/xtea
+    mbedtls/certs mbedtls/pkcs11 mbedtls/x509 mbedtls/x509_create
+    mbedtls/x509_crl mbedtls/x509_crt mbedtls/x509_csr
+    mbedtls/x509write_crt mbedtls/x509write_csr
+    mbedtls/debug mbedtls/net_sockets mbedtls/ssl_cache
+    mbedtls/ssl_ciphersuites mbedtls/ssl_cli mbedtls/ssl_cookie
+    mbedtls/ssl_srv mbedtls/ssl_ticket mbedtls/ssl_tls
+    )
+
+set(SRC_C
+    ncbi_ansi_ext ncbi_buffer ncbi_types ncbi_priv ncbi_core ncbi_util
+    ncbi_socket ncbi_connutil ncbi_connection ncbi_connector
+    ncbi_socket_connector ncbi_file_connector ncbi_http_connector
+    ncbi_memory_connector ncbi_heapmgr ncbi_server_info ncbi_service
+    ncbi_host_info ncbi_dispd ncbi_service_connector ncbi_sendmail
+    ncbi_ftp_connector ncbi_lb ncbi_local ncbi_base64 ncbi_version
+    ncbi_lbos ncbi_linkerd ncbi_namerd parson ncbi_ipv6
+    ncbi_iprange ncbi_localip
+    ${os_src}
+    )
+
+set(SRC_CXX
+    ncbi_socket_cxx ncbi_core_cxx email_diag_handler
+    ncbi_conn_streambuf ncbi_conn_stream ncbi_conn_test
+    ncbi_misc ncbi_namedpipe ncbi_namedpipe_connector
+    ncbi_pipe ncbi_pipe_connector ncbi_conn_reader_writer
+    ncbi_userhost ncbi_http_session ncbi_lbos_cxx ncbi_monkey
+    ncbi_service_cxx
+    ${SRC_TLS}
+    )
+
+
+NCBI_disable_pch()
+NCBI_add_library(connect connssl xxconnect xconnect xthrserv)
+NCBI_add_subdirectory(services ext test daemons)
+
+if(OFF)
+# Include projects from this directory
+include(CMakeLists.connect.lib.txt)
+include(CMakeLists.connssl.lib.txt)
+include(CMakeLists.xxconnect.lib.txt)
+include(CMakeLists.xconnect.lib.txt)
+include(CMakeLists.xthrserv.lib.txt)
+
+# Recurse subdirectories
+add_subdirectory(services)
+add_subdirectory(ext)
+add_subdirectory(test )
+add_subdirectory(daemons)
+endif()

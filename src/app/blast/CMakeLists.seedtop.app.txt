@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(seedtop-app
+    seedtop_app
+)
+
+set_target_properties(seedtop-app PROPERTIES OUTPUT_NAME seedtop)
+
+target_link_libraries(seedtop-app
+    blast_app_util
+)
+

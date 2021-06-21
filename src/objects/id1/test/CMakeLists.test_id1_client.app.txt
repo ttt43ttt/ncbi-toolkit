@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.test_id1_client.app.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_id1_client)
+  NCBI_sources(test_id1_client)
+  NCBI_uses_toolkit_libraries(id1cli)
+  NCBI_project_watchers(ucko)
+NCBI_end_app()
+
+
+if(OFF)
+add_executable(test_id1_client-app
+    test_id1_client
+)
+
+set_target_properties(test_id1_client-app PROPERTIES OUTPUT_NAME test_id1_client)
+
+target_link_libraries(test_id1_client-app
+    id1cli
+)
+endif()

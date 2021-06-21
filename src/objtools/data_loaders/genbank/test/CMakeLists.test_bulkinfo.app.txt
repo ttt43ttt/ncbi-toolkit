@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.test_bulkinfo.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_bulkinfo)
+  NCBI_sources(test_bulkinfo bulkinfo_tester)
+  NCBI_uses_toolkit_libraries(ncbi_xdbapi_ftds ncbi_xloader_genbank ncbi_xreader_pubseqos xobjutil)
+  NCBI_project_watchers(vasilche)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_bulkinfo-app
+    test_bulkinfo bulkinfo_tester
+)
+
+set_target_properties(test_bulkinfo-app PROPERTIES OUTPUT_NAME test_bulkinfo)
+
+target_link_libraries(test_bulkinfo-app
+    ncbi_xdbapi_ftds ncbi_xloader_genbank ncbi_xreader_pubseqos
+    xobjutil
+)
+endif()

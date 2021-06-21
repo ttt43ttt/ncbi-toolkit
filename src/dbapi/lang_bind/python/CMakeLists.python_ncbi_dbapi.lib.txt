@@ -1,0 +1,21 @@
+#############################################################################
+# $Id: CMakeLists.python_ncbi_dbapi.lib.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(python_ncbi_dbapi)
+  NCBI_sources(python_ncbi_dbapi)
+  NCBI_headers(*.hpp pythonpp/*.hpp)
+  NCBI_uses_toolkit_libraries(dbapi xconnext xutil)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_lib()
+
+if(OFF)
+add_library(python_ncbi_dbapi python_ncbi_dbapi)
+
+include_directories(SYSTEM ${PYTHON_INCLUDE})
+
+target_link_libraries(python_ncbi_dbapi
+    dbapi xconnext xutil
+    ${PYTHON_LIBS}
+)
+endif()

@@ -1,0 +1,11 @@
+# $Id: Makefile.psg_rpc.lib 557795 2018-02-21 15:11:48Z satskyse $
+
+SRC = DdRpcDataPacker
+LIB = psg_rpc
+
+LIBS = $(PSG_RPC_LIBS)
+CPPFLAGS= $(ORIG_CPPFLAGS) $(PSG_RPC_INCLUDE)
+
+REQUIRES = NGHTTP2 LIBUV H2O MT Linux
+
+WATCHERS = satskyse dmitrie1

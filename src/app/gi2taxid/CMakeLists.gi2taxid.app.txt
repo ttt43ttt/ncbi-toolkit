@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(gi2taxid-app
+    gi2taxid
+)
+
+set_target_properties(gi2taxid-app PROPERTIES OUTPUT_NAME gi2taxid)
+
+target_link_libraries(gi2taxid-app
+    id1cli taxon1
+)
+

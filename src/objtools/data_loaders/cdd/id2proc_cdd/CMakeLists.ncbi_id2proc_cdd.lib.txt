@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_id2proc_cdd.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_id2proc_cdd SHARED)
+  NCBI_sources(id2cdd id2cdd_impl)
+  NCBI_add_definitions(NCBI_ID2PROC_CDD_EXPORTS)
+  NCBI_uses_toolkit_libraries(cdd_access xcompress seq)
+  NCBI_project_watchers(grichenk)
+NCBI_end_lib()
+
+if(OFF)
+add_library(ncbi_id2proc_cdd
+    id2cdd id2cdd_impl
+)
+
+add_dependencies(ncbi_id2proc_cdd
+    seq
+)
+
+target_link_libraries(ncbi_id2proc_cdd
+    cdd_access xcompress
+)
+endif()

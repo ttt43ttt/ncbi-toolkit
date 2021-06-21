@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(blastn-app
+    blastn_app
+)
+
+set_target_properties(blastn-app PROPERTIES OUTPUT_NAME blastn)
+
+target_link_libraries(blastn-app
+    blast_app_util
+)
+

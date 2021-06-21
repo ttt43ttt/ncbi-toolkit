@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.bam_compare.app.txt 567016 2018-07-11 17:34:16Z dicuccio $
+#############################################################################
+
+NCBI_begin_app(bam_compare)
+  NCBI_sources(bam_compare samtools bam_test_common)
+  NCBI_requires(Linux)
+  NCBI_uses_toolkit_libraries(bamread xobjreadex xobjsimple)
+  NCBI_uses_external_libraries(${SAMTOOLS_LIBS})
+  NCBI_add_include_directories(${SRA_INCLUDE} ${SAMTOOLS_INCLUDE})
+  NCBI_project_watchers(vasilche ucko)
+NCBI_end_app()
+
+if(OFF)
+add_executable(bam_compare-app
+    bam_compare samtools bam_test_common
+)
+
+set_target_properties(bam_compare-app PROPERTIES OUTPUT_NAME bam_compare)
+
+include_directories(SYSTEM ${SRA_INCLUDE} ${SAMTOOLS_INCLUDE})
+
+target_link_libraries(bam_compare-app
+    ${SAMTOOLS_LIBS} bamread xobjreadex
+    xobjsimple
+)
+endif()

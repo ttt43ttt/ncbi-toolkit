@@ -1,0 +1,9 @@
+# $Id: Makefile.in 433717 2014-04-29 14:18:25Z bollin $
+
+APP_PROJ = biosample_chk
+
+SUB_PROJ = unit_test
+
+srcdir = @srcdir@
+
+include @builddir@/Makefile.meta

@@ -1,0 +1,9 @@
+# $Id: Makefile.in 489898 2016-01-19 19:06:08Z bollin $
+
+APP_PROJ = tls
+
+SUB_PROJ =
+
+srcdir = @srcdir@
+
+include @builddir@/Makefile.meta

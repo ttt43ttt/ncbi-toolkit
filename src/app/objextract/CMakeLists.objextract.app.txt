@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(objextract-app
+    objextract
+)
+
+set_target_properties(objextract-app PROPERTIES OUTPUT_NAME objextract)
+
+target_link_libraries(objextract-app
+    seqset
+)
+

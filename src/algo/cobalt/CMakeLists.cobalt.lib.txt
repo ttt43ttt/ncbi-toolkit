@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.cobalt.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(cobalt)
+  NCBI_sources(
+    blast cobalt dist hit hitlist phi prog resfreq rps seg seq seqalign
+    traceback tree kmercounts clusterer patterns options links
+  )
+  NCBI_uses_toolkit_libraries(xalgoalignnw xalgophytree xblast seqset biotree xnetblast blastdb)
+  NCBI_project_watchers(boratyng dicuccio )
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(cobalt
+    blast cobalt dist hit hitlist phi prog resfreq rps seg seq seqalign
+    traceback tree kmercounts clusterer patterns options links
+)
+add_dependencies(cobalt
+    seqset biotree xnetblast blastdb
+)
+
+target_link_libraries(cobalt
+    xalgoalignnw xalgophytree xblast
+)
+endif()

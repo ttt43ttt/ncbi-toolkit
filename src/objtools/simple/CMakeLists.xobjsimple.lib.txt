@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.xobjsimple.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xobjsimple)
+  NCBI_sources(simple_om)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank seqset)
+  NCBI_project_watchers(jcherry )
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xobjsimple
+    simple_om
+)
+add_dependencies(xobjsimple
+    seqset
+)
+
+target_link_libraries(xobjsimple
+    ncbi_xloader_genbank
+)
+endif()

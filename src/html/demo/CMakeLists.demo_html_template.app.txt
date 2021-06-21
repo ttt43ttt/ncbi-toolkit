@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.demo_html_template.app.txt 564553 2018-05-30 14:04:12Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(demo_html_template)
+  NCBI_sources(demo_html_template)
+  NCBI_uses_toolkit_libraries(xhtml)
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(demo_html_template-app
+    demo_html_template
+)
+
+set_target_properties(demo_html_template-app PROPERTIES OUTPUT_NAME demo_html_template)
+
+target_link_libraries(demo_html_template-app
+    xhtml
+)
+endif()

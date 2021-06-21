@@ -1,0 +1,16 @@
+#
+#
+#
+add_executable(prime_cache-app
+    prime_cache
+)
+
+set_target_properties(prime_cache-app PROPERTIES OUTPUT_NAME prime_cache)
+
+include_directories(SYSTEM ${SRA_INCLUDE})
+
+target_link_libraries(prime_cache-app
+    asn_cache ncbi_xloader_genbank sraread
+    local_taxon taxon1 xobjread xobjutil
+)
+

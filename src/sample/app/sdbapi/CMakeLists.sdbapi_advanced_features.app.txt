@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(sdbapi_advanced_features-app
+    sdbapi_advanced_features
+)
+
+set_target_properties(sdbapi_advanced_features-app PROPERTIES OUTPUT_NAME sdbapi_advanced_features)
+
+target_link_libraries(sdbapi_advanced_features-app
+    ${SDBAPI_LIB} xconnect  
+     
+)
+

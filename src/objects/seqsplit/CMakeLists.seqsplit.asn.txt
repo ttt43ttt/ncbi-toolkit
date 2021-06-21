@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.seqsplit.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(seqsplit)
+  NCBI_dataspecs(seqsplit.asn)
+  NCBI_uses_toolkit_libraries(seq seqset)
+  NCBI_project_watchers(vasilche)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE seqsplit)
+set(MODULE_IMPORT objects/seqloc/seqloc objects/seqset/seqset objects/seq/seq objects/seqalign/seqalign objects/seqfeat/seqfeat)
+set(MODULE_PATH objects/id2)
+
+set(MODULE_EXT "asn")
+add_library(seqsplit ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(seqsplit
+    seqset
+)
+endif()

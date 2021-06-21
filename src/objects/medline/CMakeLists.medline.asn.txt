@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.medline.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(medline)
+  NCBI_dataspecs(medline.asn)
+  NCBI_uses_toolkit_libraries(biblio general)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE medline)
+set(MODULE_IMPORT objects/general/general objects/biblio/biblio)
+set(MODULE_PATH objects/medline)
+
+set(MODULE_EXT "asn")
+add_library(medline ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(medline
+    biblio
+)
+endif()

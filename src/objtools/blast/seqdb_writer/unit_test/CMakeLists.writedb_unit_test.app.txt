@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.writedb_unit_test.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(writedb_unit_test)
+  NCBI_sources(writedb_unit_test criteria_unit_test)
+  NCBI_add_definitions(NCBI_MODULE=BLASTDB)
+  NCBI_uses_toolkit_libraries(writedb)
+  NCBI_project_watchers(madden camacho fongah2 boratyng rackerst)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(writedb_unit_test-app
+    writedb_unit_test criteria_unit_test
+)
+
+set_target_properties(writedb_unit_test-app PROPERTIES OUTPUT_NAME writedb_unit_test)
+
+
+
+target_link_libraries(writedb_unit_test-app
+    test_boost writedb
+)
+endif()

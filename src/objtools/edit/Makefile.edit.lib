@@ -1,0 +1,24 @@
+# $Id: Makefile.edit.lib 575168 2018-11-26 13:16:48Z ivanov $
+
+# Build library "xobjedit"
+###############################
+
+SRC = gene_utils seq_entry_edit promote autodef_with_tax \
+      field_handler apply_object string_constraint seqid_guesser dblink_field \
+      struc_comm_field text_desc_field gb_block_field \
+      link_cds_mrna cds_fix loc_edit mail_report \
+      feattable_edit gaps_edit source_edit rna_edit \
+      remote_updater parse_text_options publication_edit gap_trim \
+      external_annots feature_propagate apply_mods text_object_description
+
+LIB    = xobjedit
+
+DLL_LIB = xobjutil taxon3 valid mlacli xlogging $(SOBJMGR_LIBS)
+
+ASN_DEP = seqset valid
+
+WATCHERS = bollin gotvyans foleyjp
+
+
+USES_LIBRARIES =  \
+    taxon3 xobjutil xlogging

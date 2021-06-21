@@ -1,0 +1,14 @@
+# $Id: Makefile.ctools.lib 469340 2015-06-03 15:01:10Z ivanov $
+
+CPPFLAGS = $(ORIG_CPPFLAGS) $(NCBI_C_INCLUDE)
+SRC = ctools asn_connection
+
+LIB    = xctools
+
+REQUIRES = C-Toolkit
+
+WATCHERS = gouriano
+
+
+USES_LIBRARIES =  \
+    $(NCBI_C_ncbi) xncbi

@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(agpconvert-app
+    agpconvert
+)
+
+set_target_properties(agpconvert-app PROPERTIES OUTPUT_NAME agpconvert)
+
+target_link_libraries(agpconvert-app
+    ncbi_xloader_genbank taxon1 xobjread
+    xregexp
+)
+

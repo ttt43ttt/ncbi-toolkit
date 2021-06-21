@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.numeric.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(tds100_numeric)
+  NCBI_sources(numeric)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(tds100_numeric-app
+    numeric
+)
+
+set_target_properties(tds100_numeric-app PROPERTIES OUTPUT_NAME tds100_numeric)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE})
+
+target_link_libraries(tds100_numeric-app
+    tds_ftds100
+)
+endif()

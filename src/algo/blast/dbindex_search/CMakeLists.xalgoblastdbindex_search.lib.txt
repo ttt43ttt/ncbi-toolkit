@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.xalgoblastdbindex_search.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xalgoblastdbindex_search)
+  NCBI_sources(sr_search)
+  NCBI_uses_toolkit_libraries(seqset xobjmgr)
+  NCBI_add_definitions(DO_INLINE)
+  NCBI_project_watchers(morgulis)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xalgoblastdbindex_search
+    sr_search
+)
+add_dependencies(xalgoblastdbindex_search
+    seqset
+)
+
+target_link_libraries(xalgoblastdbindex_search
+    xobjmgr
+)
+endif()

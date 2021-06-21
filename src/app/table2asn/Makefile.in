@@ -1,0 +1,6 @@
+# $Id: Makefile.in 403926 2013-06-19 13:33:40Z bollin $
+
+APP_PROJ = table2asn
+srcdir = @srcdir@
+
+include @builddir@/Makefile.meta

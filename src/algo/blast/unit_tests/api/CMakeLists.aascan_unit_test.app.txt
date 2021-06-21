@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.aascan_unit_test.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(aascan_unit_test)
+  NCBI_sources(aascan_unit_test)
+  NCBI_uses_toolkit_libraries(blast_unit_test_util xblast)
+  NCBI_project_watchers(boratyng morgulis madden camacho fongah2)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(aascan_unit_test-app
+    aascan_unit_test
+)
+
+set_target_properties(aascan_unit_test-app PROPERTIES OUTPUT_NAME aascan_unit_test)
+
+
+
+target_link_libraries(aascan_unit_test-app
+    blast_unit_test_util xblast
+)
+endif()

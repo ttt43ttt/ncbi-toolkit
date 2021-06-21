@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.connssl.lib.txt 564453 2018-05-29 13:28:08Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(connssl)
+  NCBI_sources(${SRC_TLS})
+  NCBI_headers(*.hpp)
+  NCBI_requires(TLS)
+  NCBI_uses_toolkit_libraries(connect)
+  NCBI_project_watchers(lavr)
+NCBI_end_lib()
+
+
+if(OFF)
+add_library(connssl
+    ${SRC_TLS}
+)
+include_directories(SYSTEM ${GNUTLS_INCLUDE} ${NCBI_C_INCLUDE})
+
+link_directories(${NCBI_TOOLS_ROOT}/lib64)
+
+target_link_libraries(connssl
+    connect ${GNUTLS_LIBS}
+)
+endif()

@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_sra_loader.app.txt 566851 2018-07-09 15:25:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_sra_loader)
+  NCBI_sources(test_sra_loader)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_sra)
+  NCBI_project_watchers(vasilche ucko)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_sra_loader-app
+    test_sra_loader
+)
+
+set_target_properties(test_sra_loader-app PROPERTIES OUTPUT_NAME test_sra_loader)
+
+
+target_link_libraries(test_sra_loader-app
+    ncbi_xloader_sra test_boost
+)
+endif()

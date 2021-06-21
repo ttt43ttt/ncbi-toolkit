@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.test_seqio.app.txt 566382 2018-06-28 16:49:42Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_seqio)
+  NCBI_sources(test_seqio)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(seqset)
+  NCBI_project_watchers(vasilche gouriano)
+  NCBI_add_test()
+NCBI_end_app()
+
+
+if(OFF)
+add_executable(test_seqio-app
+    test_seqio
+)
+
+set_target_properties(test_seqio-app PROPERTIES OUTPUT_NAME test_seqio)
+
+
+target_link_libraries(test_seqio-app
+    seqset test_boost
+)
+endif()

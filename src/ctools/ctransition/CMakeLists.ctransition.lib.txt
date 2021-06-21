@@ -1,0 +1,20 @@
+#############################################################################
+# $Id: CMakeLists.ctransition.lib.txt 564553 2018-05-30 14:04:12Z gouriano $
+#############################################################################
+
+
+NCBI_begin_lib(ctransition)
+  NCBI_sources(ct_ncbierr ct_ncbimem ct_ncbistr)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(ivanov)
+NCBI_end_lib()
+
+if(OFF)
+add_library(ctransition
+    ct_ncbierr ct_ncbimem ct_ncbistr 
+)
+
+target_link_libraries(ctransition
+    xncbi
+)
+endif()

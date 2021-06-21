@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.makeindex.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(makembindex)
+  NCBI_sources(main mkindex_app)
+  NCBI_uses_toolkit_libraries(xalgoblastdbindex)
+  NCBI_project_watchers(morgulis)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(makembindex-app
+    main mkindex_app
+)
+
+set_target_properties(makembindex-app PROPERTIES OUTPUT_NAME makembindex)
+
+target_link_libraries(makembindex-app
+    xalgoblastdbindex
+)
+endif()

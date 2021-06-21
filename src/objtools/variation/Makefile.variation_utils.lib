@@ -1,0 +1,10 @@
+# $Id: Makefile.variation_utils.lib 514249 2016-09-20 17:47:49Z ucko $
+
+LIB = variation_utils
+SRC = variation_utils
+
+DLL_LIB = variation
+
+ASN_DEP = genome_collection seqset variation
+USES_LIBRARIES =  \
+    variation xobjutil

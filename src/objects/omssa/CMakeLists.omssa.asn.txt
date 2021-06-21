@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.omssa.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(omssa)
+  NCBI_dataspecs(omssa.asn)
+  NCBI_uses_toolkit_libraries(seq)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE omssa)
+set(MODULE_IMPORT objects/seq/seq)
+set(MODULE_PATH objects/omssa)
+
+set(MODULE_EXT "asn")
+add_library(omssa ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    seq
+)
+
+target_link_libraries(omssa
+    seq
+)
+endif()

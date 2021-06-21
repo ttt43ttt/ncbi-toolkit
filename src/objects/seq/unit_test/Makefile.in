@@ -1,0 +1,12 @@
+# $Id: Makefile.in 534653 2017-05-01 11:59:23Z ludwigf $
+
+APP_PROJ = seq_id_unit_test seqalign_unit_test mapper_unit_test \
+           ecnum_unit_test seq_c_compat_unit_test seqfeatdata_unit_test seqfeat_unit_test \
+	   seq_loc_unit_test \
+       unit_test_so_map
+PROJ_TAG = test
+
+REQUIRES = Boost.Test.Included
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

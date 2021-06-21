@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.valid.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(valid)
+  NCBI_dataspecs(valid.asn)
+  NCBI_uses_toolkit_libraries(general xregexp)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE valid)
+set(MODULE_IMPORT )
+set(MODULE_PATH )
+
+set(MODULE_EXT "asn")
+add_library(valid ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+target_link_libraries(${MODULE}
+    general-lib xregexp
+)
+
+target_link_libraries(valid
+    general-lib xregexp
+)
+endif()

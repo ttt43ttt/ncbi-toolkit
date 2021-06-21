@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(seqannot_splicer-app
+    seqannot_splicer seqannot_splicer_stats seqannot_splicer_util
+)
+
+set_target_properties(seqannot_splicer-app PROPERTIES OUTPUT_NAME seqannot_splicer)
+
+target_link_libraries(seqannot_splicer-app
+    seqset 
+)
+

@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(idfetch-app
+    idfetch
+)
+
+set_target_properties(idfetch-app PROPERTIES OUTPUT_NAME idfetch)
+
+target_link_libraries(idfetch-app
+    data_loaders_util eutils_client xobjutil
+)
+

@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.sraread.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(sraread SHARED)
+  NCBI_sources(
+    sraread vdbread kdbread csraread wgsresolver wgsresolver_impl wgsread
+    graphread snpread
+  )
+  NCBI_add_definitions(NCBI_SRAREAD_EXPORTS)
+  NCBI_uses_toolkit_libraries(xobjmgr)
+  NCBI_project_watchers(vasilche)
+  NCBI_add_include_directories(${SRA_INCLUDE})
+  NCBI_uses_external_libraries(${SRAREAD_LDEP})
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(sraread
+    sraread vdbread kdbread csraread wgsresolver wgsresolver_impl wgsread
+    graphread snpread
+)
+include_directories(SYSTEM ${SRA_INCLUDE})
+
+target_link_libraries(sraread
+    xobjmgr ${SRAREAD_LDEP}
+)
+endif()

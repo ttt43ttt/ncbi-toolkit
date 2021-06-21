@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(agp_renumber-app
+    agp_renumber
+)
+
+set_target_properties(agp_renumber-app PROPERTIES OUTPUT_NAME agp_renumber)
+
+target_link_libraries(agp_renumber-app
+    xobjread
+)
+

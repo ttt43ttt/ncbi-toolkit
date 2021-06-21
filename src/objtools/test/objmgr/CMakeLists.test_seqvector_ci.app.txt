@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.test_seqvector_ci.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_seqvector_ci)
+  NCBI_sources(test_seqvector_ci)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank)
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_seqvector_ci-app
+    test_seqvector_ci
+)
+
+set_target_properties(test_seqvector_ci-app PROPERTIES OUTPUT_NAME test_seqvector_ci)
+
+target_link_libraries(test_seqvector_ci-app
+    ncbi_xloader_genbank
+)
+endif()

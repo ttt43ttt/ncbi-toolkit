@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.asniotest.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(asniotest)
+  NCBI_sources(asniotest)
+  NCBI_uses_toolkit_libraries(id1cli ncbimime pcsubstance)
+  NCBI_add_test()
+  NCBI_project_watchers(gouriano)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(asniotest-app
+    asniotest
+)
+
+set_target_properties(asniotest-app PROPERTIES OUTPUT_NAME asniotest)
+
+target_link_libraries(asniotest-app
+    id1cli ncbimime pcsubstance
+)
+endif()

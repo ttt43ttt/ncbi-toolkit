@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.test_vmerge.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_vmerge)
+  NCBI_sources(test_vmerge)
+  NCBI_uses_toolkit_libraries(xalgovmerge)
+  NCBI_project_watchers(kuznets)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_vmerge-app
+    test_vmerge
+)
+
+set_target_properties(test_vmerge-app PROPERTIES OUTPUT_NAME test_vmerge)
+
+target_link_libraries(test_vmerge-app
+    xalgovmerge
+)
+endif()

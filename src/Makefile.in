@@ -1,0 +1,9 @@
+# $Id: Makefile.in 579023 2019-01-29 17:28:25Z fukanchi $
+
+# Master (top-level) makefile for all NCBI C++ projects
+##################################################################
+
+# Actual content moved to src/build-system, at least by default, to
+# make it easier to maintain (svn:externals-based) "patchwork" trees.
+
+include ./Makefile.top_builddir

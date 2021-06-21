@@ -1,0 +1,6 @@
+# $Id: Makefile.in 556134 2018-01-26 15:07:05Z satskyse $
+
+LIB_PROJ = psg_rpc
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

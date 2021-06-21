@@ -1,0 +1,33 @@
+#############################################################################
+# $Id: CMakeLists.util.lib.txt 565603 2018-06-14 13:44:37Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xobjutil)
+  NCBI_sources(
+    weight sequence feature indexer seqtitle create_defline obj_sniff seq_loc_util seq_align_util seq_trimmer bioseqgaps_ci
+    objutil feature_edit
+    autodef autodef_feature_clause_base autodef_source_desc autodef_available_modifier
+    autodef_mod_combo autodef_source_group autodef_feature_clause autodef_options
+  )
+  NCBI_uses_toolkit_libraries(submit xobjmgr)
+  NCBI_project_watchers(ucko vasilche)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xobjutil
+    weight sequence feature indexer seqtitle create_defline obj_sniff seq_loc_util seq_align_util seq_trimmer bioseqgaps_ci
+    objutil feature_edit
+    autodef autodef_feature_clause_base autodef_source_desc autodef_available_modifier
+    autodef_mod_combo autodef_source_group autodef_feature_clause autodef_options
+)
+add_dependencies(xobjutil
+    submit
+)
+
+target_link_libraries(xobjutil
+    submit xobjmgr
+)
+endif()

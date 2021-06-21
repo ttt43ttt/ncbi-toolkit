@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_xdbapi_mysql.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_xdbapi_mysql SHARED)
+  NCBI_sources(connection context lang_cmd result)
+  NCBI_add_definitions(NCBI_DBAPIDRIVER_MYSQL_EXPORTS)
+  NCBI_uses_toolkit_libraries(dbapi_driver)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+
+if (MYSQL_FOUND)
+   add_library(ncbi_xdbapi_mysql
+       connection context lang_cmd result
+   )
+   include_directories(SYSTEM ${MYSQL_INCLUDE} ${Z_INCLUDE})
+
+   target_link_libraries(ncbi_xdbapi_mysql
+       dbapi_driver ${MYSQL_LIBS} ${Z_LIBS}
+   )
+endif (MYSQL_FOUND)
+endif()

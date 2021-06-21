@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.bm_sparse_sample.app.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+NCBI_begin_app(bm_sparse_sample)
+  NCBI_sources(bm_sparse_sample)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(kuznets)
+NCBI_end_app()
+
+if (OFF)
+#
+add_executable(bm_sparse_sample-app
+    bm_sparse_sample
+)
+
+set_target_properties(bm_sparse_sample-app PROPERTIES OUTPUT_NAME bm_sparse_sample)
+
+target_link_libraries(bm_sparse_sample-app
+    xncbi
+)
+endif()

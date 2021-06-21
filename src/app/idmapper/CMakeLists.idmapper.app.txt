@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(idmapper-app
+    idmapper
+)
+
+set_target_properties(idmapper-app PROPERTIES OUTPUT_NAME idmapper)
+
+target_link_libraries(idmapper-app
+    xobjreadex
+)
+

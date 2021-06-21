@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.test_relloc.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_relloc)
+  NCBI_sources(test_relloc)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xobjutil)
+  NCBI_project_watchers(ucko)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_relloc-app
+    test_relloc
+)
+
+set_target_properties(test_relloc-app PROPERTIES OUTPUT_NAME test_relloc)
+
+target_link_libraries(test_relloc-app
+    ncbi_xloader_genbank xobjutil
+)
+endif()

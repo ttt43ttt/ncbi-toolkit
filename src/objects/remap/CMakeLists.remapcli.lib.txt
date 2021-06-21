@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.remapcli.lib.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(remapcli)
+  NCBI_sources(remap_client.cpp ${NCBI_CURRENT_SOURCE_DIR}/remap_client_.cpp)
+  set_source_files_properties(${NCBI_CURRENT_SOURCE_DIR}/remap_client_.cpp PROPERTIES GENERATED TRUE)
+  NCBI_uses_toolkit_libraries(remap xconnect)
+  NCBI_project_watchers(jcherry)
+NCBI_end_lib()
+
+
+if(OFF)
+
+add_library(remapcli
+    remap_client remap_client_
+)
+
+target_link_libraries(remapcli
+    remap xconnect
+)
+endif()

@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.genomic_compart_unit_test.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(genomic_compart_unit_test)
+  NCBI_sources(genomic_compart_unit_test)
+  NCBI_uses_toolkit_libraries(xalgoalignutil)
+  NCBI_project_watchers(mozese2)
+  NCBI_add_test(genomic_compart_unit_test -input-dir data -expected-results data/genomic_compart.test.results)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(genomic_compart_unit_test-app
+    genomic_compart_unit_test
+)
+
+set_target_properties(genomic_compart_unit_test-app PROPERTIES OUTPUT_NAME genomic_compart_unit_test)
+
+
+
+target_link_libraries(genomic_compart_unit_test-app
+    test_boost xalgoalignutil
+)
+endif()

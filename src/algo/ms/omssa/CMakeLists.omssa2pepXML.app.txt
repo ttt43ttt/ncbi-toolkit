@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.omssa2pepXML.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(omssa2pepXML)
+  NCBI_sources(omssa2pepXML)
+  NCBI_uses_toolkit_libraries(xomssa)
+  NCBI_project_watchers(lewisg gorelenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(omssa2pepXML-app
+    omssa2pepXML
+)
+
+set_target_properties(omssa2pepXML-app PROPERTIES OUTPUT_NAME omssa2pepXML)
+
+target_link_libraries(omssa2pepXML-app
+    xomssa
+)
+endif()

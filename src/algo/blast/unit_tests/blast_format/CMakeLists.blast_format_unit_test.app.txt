@@ -1,0 +1,32 @@
+#############################################################################
+# $Id: CMakeLists.blast_format_unit_test.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(blast_format_unit_test)
+  NCBI_sources(
+    seqalignfilter_unit_test blastfmtutil_unit_test build_archive_unit_test
+    vecscreen_run_unit_test blast_format_unit_test
+  )
+  NCBI_add_definitions(NCBI_MODULE=BLASTFORMAT)
+  NCBI_uses_toolkit_libraries(blastinput xblastformat)
+  NCBI_project_watchers(jianye zaretska madden camacho)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(blast_format_unit_test-app
+    seqalignfilter_unit_test blastfmtutil_unit_test build_archive_unit_test
+    vecscreen_run_unit_test
+)
+
+set_target_properties(blast_format_unit_test-app PROPERTIES OUTPUT_NAME blast_format_unit_test)
+
+
+
+target_link_libraries(blast_format_unit_test-app
+    blastinput test_boost xblastformat
+)
+endif()

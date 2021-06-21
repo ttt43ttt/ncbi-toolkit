@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.xcompareannotsdemo.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(xcompareannotsdemo)
+  NCBI_sources(xcompareannotsdemo)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalgoseq)
+  NCBI_project_watchers(astashya)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(xcompareannotsdemo-app
+    xcompareannotsdemo
+)
+
+set_target_properties(xcompareannotsdemo-app PROPERTIES OUTPUT_NAME xcompareannotsdemo)
+
+target_link_libraries(xcompareannotsdemo-app
+    ncbi_xloader_genbank xalgoseq
+)
+endif()

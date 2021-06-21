@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.prepare_results.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_prepare_results)
+  NCBI_sources(prepare_results common)
+  NCBI_add_test(test-odbc100 odbc100_prepare_results)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_prepare_results-app
+    prepare_results common
+)
+
+set_target_properties(odbc100_prepare_results-app PROPERTIES OUTPUT_NAME odbc100_prepare_results)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_prepare_results-app
+    odbc_ftds100
+)
+endif()

@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_applog.app.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(ncbi_applog)
+  NCBI_sources(ncbi_applog ncbi_applog_url)
+  NCBI_uses_toolkit_libraries(clog xconnect xregexp)
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ncbi_applog-app
+    ncbi_applog ncbi_applog_url
+)
+
+set_target_properties(ncbi_applog-app PROPERTIES OUTPUT_NAME ncbi_applog)
+
+include_directories(${PCRE_INCLUDE})
+
+target_link_libraries(ncbi_applog-app
+    clog xconnect xregexp
+)
+endif()

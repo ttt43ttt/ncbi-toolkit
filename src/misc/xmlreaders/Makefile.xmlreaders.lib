@@ -1,0 +1,6 @@
+# $Id: Makefile.xmlreaders.lib 427430 2014-02-20 13:42:18Z gouriano $
+
+LIB = xmlreaders
+SRC = rfam_tool
+USES_LIBRARIES =  \
+    xmlwrapp xncbi

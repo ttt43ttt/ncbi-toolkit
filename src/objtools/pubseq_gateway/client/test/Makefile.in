@@ -1,0 +1,6 @@
+# $Id: Makefile.in 568556 2018-08-07 16:49:57Z sadyrovr $
+
+APP_PROJ = AccVerCache test_psg
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

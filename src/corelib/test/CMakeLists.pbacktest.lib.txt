@@ -1,0 +1,15 @@
+#############################################################################
+# $Id: CMakeLists.pbacktest.lib.txt 567661 2018-07-23 12:51:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xpbacktest)
+  NCBI_sources(pbacktest.cpp)
+  NCBI_headers(pbacktest.hpp)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(lavr)
+NCBI_end_lib()
+
+if(OFF)
+add_library(xpbacktest    pbacktest)
+target_link_libraries(xpbacktest    xncbi)
+endif()

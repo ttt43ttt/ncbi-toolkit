@@ -1,0 +1,24 @@
+#################################
+# $Id: Makefile.metal.tmpl.in 575300 2018-11-27 15:24:32Z ivanov $
+# Author:  Denis Vakatov (vakatov@ncbi.nlm.nih.gov)
+#################################
+
+# Standard template to build a shader library
+#############################################
+
+builddir = @builddir@
+
+
+# Configured makefile variables:
+#   tools, flags, paths
+#
+include $(builddir)/Makefile.mk
+
+
+# Project definition
+include $(srcdir)/Makefile.$(TMPL).metal
+
+
+# Standard build rules
+#
+include $(builddir)/Makefile.metal

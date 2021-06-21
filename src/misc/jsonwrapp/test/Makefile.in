@@ -1,0 +1,6 @@
+# $Id: Makefile.in 528470 2017-02-23 14:33:44Z gouriano $
+
+APP_PROJ = test_jsonwrapp test_jsonwrapp10
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

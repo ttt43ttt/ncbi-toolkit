@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.test_ic_client.app.txt 568804 2018-08-10 16:44:01Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_ic_client)
+  NCBI_sources(test_ic_client)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(ncbi_xcache_netcache test_boost)
+  NCBI_project_watchers(sadyrovr gouriano fukanchi)
+  NCBI_set_test_timeout(400)
+  NCBI_add_test()
+NCBI_end_app()
+
+
+if(OFF)
+#
+#
+#
+add_executable(test_ic_client-app
+    test_ic_client
+)
+
+set_target_properties(test_ic_client-app PROPERTIES OUTPUT_NAME test_ic_client)
+
+target_link_libraries(test_ic_client-app
+    ncbi_xcache_netcache test_boost
+)
+endif()

@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.dbapi_util_blobstore.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(dbapi_util_blobstore SHARED)
+  NCBI_sources(blobstore)
+  NCBI_add_definitions(NCBI_DBAPIUTIL_BLOBSTORE_EXPORTS)
+  NCBI_uses_toolkit_libraries(dbapi_driver xcompress)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(dbapi_util_blobstore
+    blobstore
+)
+include_directories(SYSTEM ${CMPRS_INCLUDE})
+
+target_link_libraries(dbapi_util_blobstore
+    dbapi_driver xcompress
+)
+endif()

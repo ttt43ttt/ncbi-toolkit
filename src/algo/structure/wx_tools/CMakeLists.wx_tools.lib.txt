@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.wx_tools.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(wx_tools)
+  NCBI_sources(wx_tools)
+  NCBI_requires(wxWidgets)
+  NCBI_uses_toolkit_libraries(xutil)
+  NCBI_project_watchers(kapustin dicuccio)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(wx_tools
+    wx_tools
+)
+add_definitions(${wxWidgets_CXX_FLAGS})
+include_directories(${WXWIDGETS_INCLUDE})
+
+#link_directories(${wxWidgets_LIBRARY_DIRS})
+
+target_link_libraries(wx_tools
+    xutil ${wxWidgets_LIBRARIES}
+)
+endif()

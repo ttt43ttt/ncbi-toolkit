@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.t0023.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(db95_t0023)
+  NCBI_sources(t0023 common)
+  NCBI_set_test_assets(t0023.sql)
+  NCBI_add_test(test-db95 db95_t0023)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(db95_t0023-app
+    t0023 common
+)
+
+set_target_properties(db95_t0023-app PROPERTIES OUTPUT_NAME db95_t0023)
+
+include_directories(SYSTEM ${FTDS95_INCLUDE})
+
+target_link_libraries(db95_t0023-app
+    sybdb_ftds95 ${FTDS95_CTLIB_LIBS}
+     ${RT_LIBS} ${C_LIBS} 
+)
+endif()

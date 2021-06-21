@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(objmgr_demo-app
+    objmgr_demo
+)
+
+set_target_properties(objmgr_demo-app PROPERTIES OUTPUT_NAME objmgr_demo)
+
+target_link_libraries(objmgr_demo-app
+    ncbi_xdbapi_ftds ncbi_xloader_blastdb ncbi_xloader_genbank
+    ncbi_xloader_lds2 ncbi_xreader_pubseqos xobjutil
+)
+

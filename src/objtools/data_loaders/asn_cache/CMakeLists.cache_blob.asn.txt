@@ -1,0 +1,41 @@
+#############################################################################
+# $Id: CMakeLists.cache_blob.asn.txt 567009 2018-07-11 16:34:30Z dicuccio $
+#############################################################################
+
+NCBI_begin_lib(asn_cache)
+  NCBI_dataspecs(cache_blob.asn)
+  NCBI_sources(
+    asn_cache asn_cache_store asn_cache_stats asn_cache_util
+    asn_index chunk_file dump_asn_index seq_id_chunk_file
+  )
+  NCBI_uses_toolkit_libraries(bdb seqset xcompress)
+  NCBI_project_watchers(marksc2)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+
+set(MODULE cache_blob)
+set(MODULE_IMPORT )
+set(MODULE_PATH )
+
+set(MODULE_EXT "asn")
+add_library(cache_blob ${MODULE}__ ${MODULE}___)
+add_dependencies(cache_blob
+    seqset
+)
+
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}__.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}___.cpp PROPERTIES GENERATED 1)
+
+target_link_libraries(${MODULE}
+    seqset xcompress
+)
+
+target_link_libraries(cache_blob
+    xcompress xser
+)
+endif()

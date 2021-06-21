@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.composition_adjustment.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(composition_adjustment)
+  NCBI_sources(
+    compo_heap compo_mode_condition composition_adjustment
+    matrix_frequency_data nlm_linear_algebra optimize_target_freq
+    redo_alignment smith_waterman unified_pvalues
+  )
+  NCBI_disable_pch()
+  NCBI_uses_external_libraries(${MATH_LIBS})
+  NCBI_project_watchers(gertz schaffer)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(composition_adjustment
+    compo_heap compo_mode_condition composition_adjustment
+    matrix_frequency_data nlm_linear_algebra optimize_target_freq
+    redo_alignment smith_waterman unified_pvalues
+)
+
+target_link_libraries(composition_adjustment
+    ${MATH_LIBS}
+)
+endif()

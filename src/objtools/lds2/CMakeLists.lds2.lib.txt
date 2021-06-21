@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.lds2.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(lds2)
+  NCBI_sources(lds2 lds2_db lds2_handlers)
+  NCBI_requires(SQLITE3)
+  NCBI_uses_toolkit_libraries(xcompress xobjread)
+  NCBI_project_watchers(grichenk)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(lds2
+    lds2 lds2_db lds2_handlers
+)
+include_directories(SYSTEM ${SQLITE3_INCLUDE} ${CMPRS_INCLUDE})
+
+target_link_libraries(lds2
+    sqlitewrapp xcompress xobjread
+)
+endif()

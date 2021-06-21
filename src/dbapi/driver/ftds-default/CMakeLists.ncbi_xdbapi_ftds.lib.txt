@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.ncbi_xdbapi_ftds.lib.txt 567665 2018-07-23 12:58:02Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(ncbi_xdbapi_ftds SHARED)
+  NCBI_sources(bcp connection context cursor ftds_ctlib_utils lang_cmd result rpc)
+  NCBI_add_include_directories(${NCBI_CURRENT_SOURCE_DIR})
+  NCBI_add_definitions(FTDS_IN_USE NCBI_DBAPIDRIVER_CTLIB_EXPORTS)
+  NCBI_uses_toolkit_libraries(dbapi_driver)
+  NCBI_project_watchers(ucko satskyse)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(ncbi_xdbapi_ftds
+    bcp connection context cursor ftds_ctlib_utils lang_cmd result rpc
+)
+include_directories(SYSTEM ${FTDS_INCLUDE})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} )
+add_definitions( -DFTDS_IN_USE )
+
+target_link_libraries(ncbi_xdbapi_ftds
+    ct_${ftds} dbapi_driver
+)
+endif()

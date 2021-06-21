@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.align_filter_unit_test.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(align_filter_unit_test)
+  NCBI_sources(align_filter_unit_test)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalgoalignutil)
+  NCBI_project_watchers(mozese2)
+  NCBI_add_test(align_filter_unit_test -data-in data/seqalign.asn -filters data/filters)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(align_filter_unit_test-app
+    align_filter_unit_test
+)
+
+set_target_properties(align_filter_unit_test-app PROPERTIES OUTPUT_NAME align_filter_unit_test)
+
+
+
+target_link_libraries(align_filter_unit_test-app
+    ncbi_xloader_genbank test_boost xalgoalignutil
+)
+endif()

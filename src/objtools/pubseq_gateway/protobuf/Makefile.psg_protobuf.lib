@@ -1,0 +1,13 @@
+# $Id: Makefile.psg_protobuf.lib 568352 2018-08-02 19:27:15Z dmitrie1 $
+
+LIB = psg_protobuf
+
+SRC = psg_protobuf.pb
+
+CPPFLAGS = $(PROTOBUF_INCLUDE) $(ORIG_CPPFLAGS)
+LIBS = $(PROTOBUF_LIBS) $(ORIG_LIBS)
+
+WATCHERS = satskyse dmitrie1
+
+REQUIRES = MT PROTOBUF
+

@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.mla.asn.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(mla)
+  NCBI_dataspecs(mla.asn)
+  NCBI_uses_toolkit_libraries(biblio medline medlars pubmed pub)
+NCBI_end_lib()
+
+
+if(OFF)
+
+set(MODULE mla)
+set(MODULE_IMPORT objects/ /biblio objects/medline/medline objects/medlars/medlars objects/pubmed/pubmed objects/pub/pub)
+set(MODULE_PATH objects/mla)
+
+set(MODULE_EXT "asn")
+add_library(mla ${MODULE}__ ${MODULE}___)
+
+RunDatatool("${MODULE}" "${MODULE_IMPORT}")
+
+
+target_link_libraries(${MODULE}
+    medlars pub
+)
+
+target_link_libraries(mla
+    medlars pub pubmed
+)
+endif()

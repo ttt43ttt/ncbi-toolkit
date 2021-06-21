@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.bam2graph.app.txt 567016 2018-07-11 17:34:16Z dicuccio $
+#############################################################################
+
+NCBI_begin_app(bam2graph)
+  NCBI_sources(bam2graph)
+  NCBI_uses_toolkit_libraries(bamread)
+  NCBI_project_watchers(vasilche ucko)
+  NCBI_add_include_directories(${SRA_INCLUDE})
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(bam2graph-app
+    bam2graph
+)
+
+set_target_properties(bam2graph-app PROPERTIES OUTPUT_NAME bam2graph)
+
+include_directories(SYSTEM ${SRA_INCLUDE})
+
+target_link_libraries(bam2graph-app
+    bamread
+)
+endif()

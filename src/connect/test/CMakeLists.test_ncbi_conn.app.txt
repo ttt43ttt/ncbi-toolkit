@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.test_ncbi_conn.app.txt 568804 2018-08-10 16:44:01Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_ncbi_conn)
+  NCBI_sources(test_ncbi_conn)
+  NCBI_uses_toolkit_libraries(xconnect xutil)
+  NCBI_project_watchers(lavr satskyse)
+  NCBI_set_test_assets(../../check/ncbi_test_data)
+  NCBI_add_test(test_ncbi_conn.sh)
+NCBI_end_app()
+
+
+if(OFF)
+#
+#
+#
+add_executable(test_ncbi_conn-app
+    test_ncbi_conn
+)
+
+set_target_properties(test_ncbi_conn-app PROPERTIES OUTPUT_NAME test_ncbi_conn)
+
+target_link_libraries(test_ncbi_conn-app
+    xconnect xutil
+)
+endif()

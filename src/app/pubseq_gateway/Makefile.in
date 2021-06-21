@@ -1,0 +1,6 @@
+# $Id: Makefile.in 556190 2018-01-26 21:10:13Z satskyse $
+
+APP_PROJ = pubseq_gateway
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

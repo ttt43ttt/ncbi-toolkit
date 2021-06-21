@@ -1,0 +1,6 @@
+# $Id: Makefile.lapackwrapp.lib 503534 2016-06-06 14:44:06Z ucko $
+LIB = lapackwrapp
+SRC = ncbi_lapack
+
+LIBS     = $(LAPACK_LIBS) $(ORIG_LIBS)
+CPPFLAGS = $(ORIG_CPPFLAGS) $(LAPACK_INCLUDE)

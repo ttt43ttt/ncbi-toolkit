@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_align_cleanup.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_align_cleanup)
+  NCBI_sources(unit_test_align_cleanup)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalgoseq)
+  NCBI_project_watchers(chetvern)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(unit_test_align_cleanup-app
+    unit_test_align_cleanup
+)
+
+set_target_properties(unit_test_align_cleanup-app PROPERTIES OUTPUT_NAME unit_test_align_cleanup)
+
+
+
+target_link_libraries(unit_test_align_cleanup-app
+    ncbi_xloader_genbank test_boost xalgoseq
+)
+endif()

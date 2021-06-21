@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(igblastp-app
+    igblastp_app
+)
+
+set_target_properties(igblastp-app PROPERTIES OUTPUT_NAME igblastp)
+
+target_link_libraries(igblastp-app
+    blast_app_util igblast
+)
+

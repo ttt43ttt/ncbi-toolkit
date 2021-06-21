@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_string_constraint.app.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_string_constraint)
+  NCBI_sources(unit_test_string_constraint)
+  NCBI_uses_toolkit_libraries(macro test_boost)
+  NCBI_project_watchers(bollin)
+  NCBI_add_test()
+NCBI_end_app()
+
+
+if(OFF)
+add_executable(unit_test_string_constraint-app
+    unit_test_string_constraint
+)
+
+set_target_properties(unit_test_string_constraint-app PROPERTIES OUTPUT_NAME unit_test_string_constraint)
+
+
+
+target_link_libraries(unit_test_string_constraint-app
+    macro test_boost
+)
+endif()

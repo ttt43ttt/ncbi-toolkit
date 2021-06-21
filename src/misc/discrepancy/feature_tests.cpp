@@ -1,0 +1,2513 @@
+/*  $Id: feature_tests.cpp 576520 2018-12-17 18:21:20Z ivanov $
+ * =========================================================================
+ *
+ *                            PUBLIC DOMAIN NOTICE
+ *               National Center for Biotechnology Information
+ *
+ *  This software/database is a "United States Government Work" under the
+ *  terms of the United States Copyright Act.  It was written as part of
+ *  the author's official duties as a United States Government employee and
+ *  thus cannot be copyrighted.  This software/database is freely available
+ *  to the public for use. The National Library of Medicine and the U.S.
+ *  Government have not placed any restriction on its use or reproduction.
+ *
+ *  Although all reasonable efforts have been taken to ensure the accuracy
+ *  and reliability of the software and data, the NLM and the U.S.
+ *  Government do not and cannot warrant the performance or results that
+ *  may be obtained by using this software or data. The NLM and the U.S.
+ *  Government disclaim all warranties, express or implied, including
+ *  warranties of performance, merchantability or fitness for any particular
+ *  purpose.
+ *
+ *  Please cite the author in any work or product based on this material.
+ *
+ * =========================================================================
+ *
+ * Authors: Colleen Bollin, based on similar discrepancy tests
+ *
+ */
+
+#include <ncbi_pch.hpp>
+
+#include "discrepancy_core.hpp"
+#include "utils.hpp"
+
+#include <objects/general/Dbtag.hpp>
+#include <objects/seqfeat/Gb_qual.hpp>
+#include <objects/seqfeat/Org_ref.hpp>
+#include <objects/seqfeat/RNA_gen.hpp>
+#include <objects/seqfeat/Imp_feat.hpp>
+#include <objects/seqfeat/Code_break.hpp>
+#include <objects/seq/Seq_ext.hpp>
+#include <objects/seq/Delta_ext.hpp>
+#include <objects/seq/Delta_seq.hpp>
+#include <objects/seq/Seq_literal.hpp>
+#include <objects/seq/seqport_util.hpp>
+#include <objects/seqfeat/Feat_id.hpp>
+#include <objtools/cleanup/cleanup.hpp>
+#include <objmgr/util/seq_loc_util.hpp>
+#include <objmgr/util/sequence.hpp>
+#include <objmgr/feat_ci.hpp>
+#include <objmgr/seqdesc_ci.hpp>
+#include <objmgr/seq_vector.hpp>
+#include <objmgr/tse_handle.hpp>
+#include <objtools/edit/cds_fix.hpp>
+
+BEGIN_NCBI_SCOPE
+BEGIN_SCOPE(NDiscrepancy)
+USING_SCOPE(objects);
+
+DISCREPANCY_MODULE(feature_tests);
+
+
+// PSEUDO_MISMATCH
+
+const string kPseudoMismatch = "[n] CDSs, RNAs, and genes have mismatching pseudos.";
+
+DISCREPANCY_CASE(PSEUDO_MISMATCH, CSeq_feat_BY_BIOSEQ, eDisc | eOncaller | eSubmitter | eSmart, "Pseudo Mismatch")
+{
+    if (obj.IsSetPseudo() && obj.GetPseudo() && 
+        (obj.GetData().IsCdregion() || obj.GetData().IsRna())) {
+        const CSeq_feat* gene = context.GetGeneForFeature(obj);
+        if (gene && !context.IsPseudo(*gene)) {
+            m_Objs[kPseudoMismatch].Add(*context.DiscrObj(obj), false).Fatal();
+            m_Objs[kPseudoMismatch].Add(*context.DiscrObj(*gene), false).Fatal();
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(PSEUDO_MISMATCH)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+static bool SetPseudo(const CSeq_feat* sf, CScope& scope)
+{
+    bool rval = false;
+    if (!sf->IsSetPseudo() || !sf->GetPseudo()) {
+        CRef<CSeq_feat> new_feat(new CSeq_feat());
+        new_feat->Assign(*sf);
+        new_feat->SetPseudo(true);
+        CSeq_feat_EditHandle feh(scope.GetSeq_featHandle(*sf));
+        feh.Replace(*new_feat);
+        rval = true;
+    }
+    return rval;
+}
+
+
+DISCREPANCY_AUTOFIX(PSEUDO_MISMATCH)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    NON_CONST_ITERATE (TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* sf = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (sf && SetPseudo(sf, scope)) {
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+    return CRef<CAutofixReport>(n ? new CAutofixReport("PSEUDO_MISMATCH: Set pseudo for [n] feature[s]", n) : 0);
+}
+
+
+// SHORT_RRNA
+
+const string kShortRRNA = "[n] rRNA feature[s] [is] too short";
+
+DISCREPANCY_CASE(SHORT_RRNA, CSeq_feat_BY_BIOSEQ, eDisc | eOncaller | eSubmitter | eSmart, "Short rRNA Features")
+{
+    if (!obj.IsSetPartial() && IsShortrRNA(obj, &(context.GetScope()))) {
+        m_Objs[kShortRRNA].Add(*context.DiscrObj(obj), false).Fatal();
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(SHORT_RRNA)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// DISC_RBS_WITHOUT_GENE
+
+static bool IsRBS(const CSeq_feat& f)
+{
+    if (f.GetData().GetSubtype() == CSeqFeatData::eSubtype_RBS) {
+        return true;
+    }
+    if (f.GetData().GetSubtype() != CSeqFeatData::eSubtype_regulatory) {
+        return false;
+    }
+    if (!f.IsSetQual()) {
+        return false;
+    }
+    for (auto it: f.GetQual()) {
+        if (it->IsSetQual() && NStr::Equal(it->GetQual(), "regulatory_class") &&
+            CSeqFeatData::GetRegulatoryClass(it->GetVal()) == CSeqFeatData::eSubtype_RBS) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+DISCREPANCY_CASE(RBS_WITHOUT_GENE, COverlappingFeatures, eOncaller, "RBS features should have an overlapping gene")
+{
+    const vector<CConstRef<CSeq_feat>>& genes = context.FeatGenes();
+    if (!genes.empty()) {
+        for (auto feat: context.FeatAll()) {
+            if (IsRBS(*feat) && !context.GetGeneForFeature(*feat)) {
+                m_Objs["[n] RBS feature[s] [does] not have overlapping gene[s]"].Add(*context.DiscrObj(*feat)).Fatal();
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(RBS_WITHOUT_GENE)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// MISSING_GENES
+
+const string kMissingGene = "[n] feature[s] [has] no genes";
+
+bool ReportGeneMissing(const CSeq_feat& f)
+{
+    CSeqFeatData::ESubtype subtype = f.GetData().GetSubtype();
+    if (subtype == CSeqFeatData::eSubtype_regulatory) {
+        return false;
+    }
+    if (IsRBS(f) ||
+        f.GetData().IsCdregion() ||
+        f.GetData().IsRna() ||
+        subtype == CSeqFeatData::eSubtype_exon ||
+        subtype == CSeqFeatData::eSubtype_intron) {
+        return true;
+    }
+    return false;
+}
+
+
+DISCREPANCY_CASE(MISSING_GENES, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Missing Genes")
+{
+    if (!ReportGeneMissing(obj)) {
+        return;
+    }
+    const CGene_ref* gene = obj.GetGeneXref();
+    if (gene) {
+        return;
+    }
+    const CSeq_feat* gene_feat = context.GetGeneForFeature(obj);
+    if (!gene_feat) {
+        m_Objs[kMissingGene].Add(*context.DiscrObj(obj), false).Fatal();
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(MISSING_GENES)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// EXTRA_GENES
+
+const string kExtraGene = "[n] gene feature[s] [is] not associated with a CDS or RNA feature.";
+const string kExtraPseudo = "[n] pseudo gene feature[s] [is] not associated with a CDS or RNA feature.";
+const string kExtraGeneNonPseudoNonFrameshift = "[n] non-pseudo gene feature[s] are not associated with a CDS or RNA feature and [does] not have frameshift in the comment.";
+
+bool IsGeneInXref(const CSeq_feat& gene, const CSeq_feat& feat, bool& have_gene_ref)
+{
+    ITERATE (CSeq_feat::TXref, it, feat.GetXref ()) {
+        if ((*it)->IsSetId()) {
+            const CFeat_id& id = (*it)->GetId();
+            if (gene.CanGetId() && gene.GetId().Equals(id)) {
+                return true;
+            }
+        }
+        if ((*it)->IsSetData() && (*it)->GetData().IsGene ()) {
+            have_gene_ref = true;
+            const CGene_ref& gene_ref = (*it)->GetData().GetGene();
+            const string& locus = gene.GetData().GetGene().IsSetLocus() ? gene.GetData().GetGene().GetLocus() : kEmptyStr;
+            const string& locus_tag = gene.GetData().GetGene().IsSetLocus_tag() ? gene.GetData().GetGene().GetLocus_tag() : kEmptyStr;
+            if ((gene_ref.IsSetLocus() || gene_ref.IsSetLocus_tag())
+                && (!gene_ref.IsSetLocus_tag() || gene_ref.GetLocus_tag() == locus_tag)
+                && (gene_ref.IsSetLocus_tag() || locus_tag.empty())
+                && (!gene_ref.IsSetLocus() || gene_ref.GetLocus() == locus)
+                && (gene_ref.IsSetLocus() || locus.empty())) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+DISCREPANCY_CASE(EXTRA_GENES, COverlappingFeatures, eDisc | eSubmitter | eSmart, "Extra Genes")
+{
+    // TODO: Do not collect if mRNA sequence in Gen-prod set
+
+    const vector<CConstRef<CSeq_feat> >& genes = context.FeatGenes();
+    const vector<CConstRef<CSeq_feat> >& all = context.FeatAll();
+    ITERATE (vector<CConstRef<CSeq_feat>>, gene, genes) {
+        if (((*gene)->IsSetComment() && !(*gene)->GetComment().empty()) || ((*gene)->GetData().GetGene().IsSetDesc() && !(*gene)->GetData().GetGene().GetDesc().empty())) {
+            continue;
+        }
+        //bool gene_partial_start = (*gene)->GetLocation().IsPartialStart(eExtreme_Biological);
+        //bool gene_partial_stop = (*gene)->GetLocation().IsPartialStop(eExtreme_Biological);
+        //const string& locus = (*gene)->GetData().GetGene().IsSetLocus() ? (*gene)->GetData().GetGene().GetLocus() : kEmptyStr;
+        //const string& locus_tag = (*gene)->GetData().GetGene().IsSetLocus_tag() ? (*gene)->GetData().GetGene().GetLocus_tag() : kEmptyStr;
+        const CSeq_loc& loc = (*gene)->GetLocation();
+//cout << "GENE: " << CReportObject::GetTextObjectDescription(**gene, context.GetScope()) << "\n";
+        bool found = false;
+        ITERATE(vector<CConstRef<CSeq_feat>>, feat, all) {
+            if ((*feat)->GetData().IsCdregion() || (*feat)->GetData().IsRna()) {
+                const CSeq_loc& loc_f = (*feat)->GetLocation();
+                sequence::ECompare cmp = context.Compare(loc, loc_f);
+                if (cmp == sequence::eSame || cmp == sequence::eContains) {
+                    //const CGene_ref* gene_ref = (*feat)->GetGeneXref();
+                    //if (gene_ref) {
+                    //    if ((gene_ref->IsSetLocus() || gene_ref->IsSetLocus_tag())
+                    //        && (!gene_ref->IsSetLocus_tag() || gene_ref->GetLocus_tag() == locus_tag)
+                    //        && (gene_ref->IsSetLocus_tag() || locus_tag.empty())
+                    //        && (!gene_ref->IsSetLocus() || gene_ref->GetLocus() == locus)
+                    //        && (gene_ref->IsSetLocus() || locus.empty())) {
+                    //            found = true;
+                    //            break;
+                    //    }
+                    //}
+                    bool have_gene_ref = false;
+                    if (IsGeneInXref(**gene, **feat, have_gene_ref)) {
+                        found = true;
+                        break;
+                    }
+                    else if (!have_gene_ref) {
+                        CConstRef<CSeq_feat> best_gene = sequence::GetBestOverlappingFeat(loc_f, CSeqFeatData::e_Gene, sequence::eOverlap_Contained, context.GetScope());
+                        if (best_gene.NotEmpty() && &*best_gene == &**gene) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!found) {
+            m_Objs[kExtraGene][context.IsPseudo(**gene) ? kExtraPseudo : kExtraGeneNonPseudoNonFrameshift].Ext().Add(*context.DiscrObj(**gene));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(EXTRA_GENES)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+//SUPERFLUOUS_GENE
+const string kSuperfluousGene = "[n] gene feature[s] [is] not associated with any feature and [is] not pseudo.";
+
+DISCREPANCY_CASE(SUPERFLUOUS_GENE, COverlappingFeatures, eDisc | eOncaller, "Superfluous Genes")
+{
+    const vector<CConstRef<CSeq_feat> >& genes = context.FeatGenes();
+    const vector<CConstRef<CSeq_feat> >& feats = context.FeatAll();
+    for (size_t i = 0; i < genes.size(); i++) {
+        if (genes[i]->IsSetPseudo() && genes[i]->GetPseudo()) {
+            continue;
+        }
+        const CSeq_loc& loc_i = genes[i]->GetLocation();
+        bool found = false;
+        for (size_t j = 0; j < feats.size(); j++) {
+            if (feats[j]->GetData().IsGene()) {
+                continue;
+            }
+            const CSeq_loc& loc_j = feats[j]->GetLocation();
+            sequence::ECompare compare = context.Compare(loc_j, loc_i);
+            if (compare == sequence::eNoOverlap) {
+                continue;
+            }
+            if (genes[i] == context.GetGeneForFeature(*feats[j])) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            m_Objs[kSuperfluousGene].Add(*context.DiscrObj(*genes[i]));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(SUPERFLUOUS_GENE)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// BACTERIAL_PARTIAL_NONEXTENDABLE_PROBLEMS
+
+const string kNonExtendableException = "unextendable partial coding region";
+
+const string kNonExtendable = "[n] feature[s] [has] partial ends that do not abut the end of the sequence or a gap, and cannot be extended by 3 or fewer nucleotides to do so";
+
+bool IsExtendableLeft(TSeqPos left, const CBioseq& seq, CScope* scope, TSeqPos& extend_len)
+{
+    bool rval = false;
+    if (left < 3) {
+        rval = true;
+        extend_len = left;
+    } else if (seq.IsSetInst() && seq.GetInst().IsSetRepr() &&
+               seq.GetInst().GetRepr() == CSeq_inst::eRepr_delta &&
+               seq.GetInst().IsSetExt() &&
+               seq.GetInst().GetExt().IsDelta()) {
+        TSeqPos offset = 0;
+        TSeqPos last_gap_stop = 0;
+        ITERATE(CDelta_ext::Tdata, it, seq.GetInst().GetExt().GetDelta().Get()) {
+            if ((*it)->IsLiteral()) {
+                offset += (*it)->GetLiteral().GetLength();
+                if (!(*it)->GetLiteral().IsSetSeq_data()) {
+                    last_gap_stop = offset;
+                } else if ((*it)->GetLiteral().GetSeq_data().IsGap()) {
+                    last_gap_stop = offset;
+                }
+            } else if ((*it)->IsLoc()) {
+                offset += sequence::GetLength((*it)->GetLoc(), scope);
+            }
+            if (offset > left) {
+                break;
+            }
+        }
+        if (left >= last_gap_stop && left - last_gap_stop <= 3) {
+            rval = true;
+            extend_len = left - last_gap_stop;
+        }
+    }
+    return rval;
+}
+
+
+bool IsExtendableRight(TSeqPos right, const CBioseq& seq, CScope* scope, TSeqPos& extend_len)
+{
+    bool rval = false;
+    if (right > seq.GetLength() - 4) {
+        rval = true;
+        extend_len = seq.GetLength() - right - 1;
+    } else if (seq.IsSetInst() && seq.GetInst().IsSetRepr() &&
+        seq.GetInst().GetRepr() == CSeq_inst::eRepr_delta &&
+        seq.GetInst().IsSetExt() &&
+        seq.GetInst().GetExt().IsDelta()) {
+        TSeqPos offset = 0;
+        TSeqPos next_gap_start = 0;
+        ITERATE(CDelta_ext::Tdata, it, seq.GetInst().GetExt().GetDelta().Get()) {
+            if ((*it)->IsLiteral()) {
+                if (!(*it)->GetLiteral().IsSetSeq_data()) {
+                    next_gap_start = offset;
+                } else if ((*it)->GetLiteral().GetSeq_data().IsGap()) {
+                    next_gap_start = offset;
+                }
+                offset += (*it)->GetLiteral().GetLength();
+            } else if ((*it)->IsLoc()) {
+                offset += sequence::GetLength((*it)->GetLoc(), scope);
+            }
+            if (offset > right + 3) {
+                break;
+            }
+        }
+        if (next_gap_start > right && next_gap_start - right - 1 <= 3) {
+            rval = true;
+            extend_len = next_gap_start - right - 1;
+        }
+    }
+    return rval;
+}
+
+
+bool IsNonExtendable(const CSeq_loc& loc, const CBioseq& seq, CScope* scope)
+{
+    bool rval = false;
+    if (loc.IsPartialStart(eExtreme_Positional)) {
+        TSeqPos start = loc.GetStart(eExtreme_Positional);
+        if (start > 0) {
+            TSeqPos extend_len = 0;
+            if (!IsExtendableLeft(start, seq, scope, extend_len)) {
+                rval = true;
+            }
+        }
+    }
+    if (!rval && loc.IsPartialStop(eExtreme_Positional)) {
+        TSeqPos stop = loc.GetStop(eExtreme_Positional);
+        if (stop < seq.GetLength() - 1) {
+            TSeqPos extend_len = 0;
+            if (!IsExtendableRight(stop, seq, scope, extend_len)) {
+                rval = true;
+            }
+        }
+    }
+    return rval;
+}
+
+
+DISCREPANCY_CASE(BACTERIAL_PARTIAL_NONEXTENDABLE_PROBLEMS, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Find partial feature ends on bacterial sequences that cannot be extended: on when non-eukaryote")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || context.GetCurrentBioseq()->IsAa()) {
+        return;
+    }
+    //only examine coding regions
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion()) {
+        return;
+    }
+
+    //ignore if feature already has exception
+    if (obj.IsSetExcept_text() && NStr::FindNoCase(obj.GetExcept_text(), kNonExtendableException) != string::npos) {
+        return;
+    }
+    CConstRef<CBioseq> seq = context.GetCurrentBioseq();
+
+    bool add_this = IsNonExtendable(obj.GetLocation(), *seq, &(context.GetScope()));
+
+    if (add_this) {
+        m_Objs[kNonExtendable].Add(*context.DiscrObj(obj, true)).Fatal();
+    }
+}
+
+
+static bool AddToException(const CSeq_feat* sf, CScope& scope, const string& except_text)
+{
+    bool rval = false;
+    if (!sf->IsSetExcept_text() || NStr::Find(sf->GetExcept_text(), except_text) == string::npos) {
+        CRef<CSeq_feat> new_feat(new CSeq_feat());
+        new_feat->Assign(*sf);
+        if (new_feat->IsSetExcept_text()) {
+            new_feat->SetExcept_text(sf->GetExcept_text() + "; " + except_text);
+        } else {
+            new_feat->SetExcept_text(except_text);
+        }
+        new_feat->SetExcept(true);
+        CSeq_feat_EditHandle feh(scope.GetSeq_featHandle(*sf));
+        feh.Replace(*new_feat);
+        rval = true;
+    }
+    return rval;
+}
+
+
+DISCREPANCY_AUTOFIX(BACTERIAL_PARTIAL_NONEXTENDABLE_PROBLEMS)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    NON_CONST_ITERATE(TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* sf = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (sf && AddToException(sf, scope, kNonExtendableException)) {
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+    return CRef<CAutofixReport>(n ? new CAutofixReport("BACTERIAL_PARTIAL_NONEXTENDABLE_PROBLEMS: Set exception for [n] feature[s]", n) : 0);
+}
+
+
+DISCREPANCY_SUMMARIZE(BACTERIAL_PARTIAL_NONEXTENDABLE_PROBLEMS)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+const string kBacterialPartialNonextendableException = "[n] feature[s] [has] partial ends that do not abut the end of the sequence or a gap, and cannot be extended by 3 or fewer nucleotides to do so, but [has] the correct exception";
+
+DISCREPANCY_CASE(BACTERIAL_PARTIAL_NONEXTENDABLE_EXCEPTION, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Find partial feature ends on bacterial sequences that cannot be extended but have exceptions: on when non-eukaryote")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || context.GetCurrentBioseq()->IsAa()) {
+        return;
+    }
+    //only examine coding regions
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion()) {
+        return;
+    }
+    //ignore if feature does not have exception
+    if (!obj.IsSetExcept_text() || NStr::FindNoCase(obj.GetExcept_text(), kNonExtendableException) == string::npos) {
+        return;
+    }
+    CConstRef<CBioseq> seq = context.GetCurrentBioseq();
+
+    bool add_this = IsNonExtendable(obj.GetLocation(), *seq, &(context.GetScope()));
+
+    if (add_this) {
+        m_Objs[kBacterialPartialNonextendableException].Add(*context.DiscrObj(obj), false);
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(BACTERIAL_PARTIAL_NONEXTENDABLE_EXCEPTION)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+const string kPartialProblems = "[n] feature[s] [has] partial ends that do not abut the end of the sequence or a gap, but could be extended by 3 or fewer nucleotides to do so";
+
+DISCREPANCY_CASE(PARTIAL_PROBLEMS, CSeq_feat_BY_BIOSEQ, eDisc | eOncaller | eSubmitter | eSmart, "Find partial feature ends on bacterial sequences, but could be extended by 3 or fewer nucleotides")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || context.GetCurrentBioseq()->IsAa()) {
+        return;
+    }
+    //only examine coding regions
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion()) {
+        return;
+    }
+    CConstRef<CBioseq> seq = context.GetCurrentBioseq();
+
+    bool add_this = false;
+    if (obj.GetLocation().IsPartialStart(eExtreme_Positional)) {
+        TSeqPos start = obj.GetLocation().GetStart(eExtreme_Positional);
+        if (start > 0) {
+            TSeqPos extend_len = 0;
+            if (IsExtendableLeft(start, *seq, &(context.GetScope()), extend_len)) {
+                add_this = extend_len > 0 && extend_len <= 3;
+            }
+        }
+    }
+    if (!add_this && obj.GetLocation().IsPartialStop(eExtreme_Positional)) {
+        TSeqPos stop = obj.GetLocation().GetStop(eExtreme_Positional);
+        if (stop < seq->GetLength() - 1) {
+            TSeqPos extend_len = 0;
+            if (IsExtendableRight(stop, *seq, &(context.GetScope()), extend_len)) {
+                add_this = extend_len > 0 && extend_len <= 3;
+            }
+        }
+    }
+
+    if (add_this) {
+        m_Objs[kPartialProblems].Add(*context.DiscrObj(obj, true)).Fatal();
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(PARTIAL_PROBLEMS)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+static bool ExtendToGapsOrEnds(const CSeq_feat& cds, CScope& scope)
+{
+    bool rval = false;
+
+    CBioseq_Handle bsh = scope.GetBioseqHandle(cds.GetLocation());
+    if (!bsh) {
+        return rval;
+    }
+    CConstRef<CBioseq> seq = bsh.GetCompleteBioseq();
+    CConstRef<CSeq_feat> gene;
+    for (CFeat_CI gene_it(bsh, CSeqFeatData::eSubtype_gene); gene_it; ++gene_it) {
+        if (gene_it->GetLocation().GetStart(eExtreme_Positional) == cds.GetLocation().GetStart(eExtreme_Positional) && gene_it->GetLocation().GetStop(eExtreme_Positional) == cds.GetLocation().GetStop(eExtreme_Positional)) {
+            gene.Reset(&gene_it->GetMappedFeature());
+            break;
+        }
+    }
+
+    CRef<CSeq_feat> new_feat(new CSeq_feat());
+    new_feat->Assign(cds);
+
+    CRef<CSeq_feat> new_gene;
+    if (gene) {
+        new_gene.Reset(new CSeq_feat());
+        new_gene->Assign(*gene);
+    }
+
+    if (cds.GetLocation().IsPartialStart(eExtreme_Positional)) {
+        TSeqPos start = cds.GetLocation().GetStart(eExtreme_Positional);
+        if (start > 0) {
+            TSeqPos extend_len = 0;
+            if (IsExtendableLeft(start, *seq, &scope, extend_len) &&
+                CCleanup::SeqLocExtend(new_feat->SetLocation(), start - extend_len, scope)) {
+                if (gene) {
+                    CCleanup::SeqLocExtend(new_gene->SetLocation(), start - extend_len, scope);
+                }
+                if (new_feat->GetData().GetCdregion().CanGetFrame() && cds.GetLocation().GetStrand() != eNa_strand_minus) {
+                    CCdregion::EFrame frame = new_feat->GetData().GetCdregion().GetFrame();
+                    if (frame != CCdregion::eFrame_not_set) {
+                        //  eFrame_not_set = 0,  ///< not set, code uses one
+                        //  eFrame_one     = 1,
+                        //  eFrame_two     = 2,
+                        //  eFrame_three   = 3  ///< reading frame
+                        unsigned fr = (unsigned)frame - 1;
+                        fr = (fr + extend_len) % 3;
+                        frame = (CCdregion::EFrame)(fr + 1);
+                        new_feat->SetData().SetCdregion().SetFrame() = frame;
+                    }
+                }
+                rval = true;
+            }
+        }
+    }
+
+    if (cds.GetLocation().IsPartialStop(eExtreme_Positional)) {
+        TSeqPos stop = cds.GetLocation().GetStop(eExtreme_Positional);
+        if (stop > 0) {
+            TSeqPos extend_len = 0;
+            if (IsExtendableRight(stop, *seq, &scope, extend_len) &&
+                CCleanup::SeqLocExtend(new_feat->SetLocation(), stop + extend_len, scope)) {
+                if (gene) {
+                    CCleanup::SeqLocExtend(new_gene->SetLocation(), stop + extend_len, scope);
+                }
+                if (new_feat->GetData().GetCdregion().CanGetFrame() && cds.GetLocation().GetStrand() == eNa_strand_minus) {
+                    CCdregion::EFrame frame = new_feat->GetData().GetCdregion().GetFrame();
+                    if (frame != CCdregion::eFrame_not_set) {
+                        unsigned fr = (unsigned)frame - 1;
+                        fr = (fr + extend_len) % 3;
+                        frame = (CCdregion::EFrame)(fr + 1);
+                        new_feat->SetData().SetCdregion().SetFrame() = frame;
+                    }
+                }
+                rval = true;
+            }
+        }
+    }
+
+    if (rval) {
+        CSeq_feat_EditHandle feh(scope.GetSeq_featHandle(cds));
+        feh.Replace(*new_feat);
+        if (gene) {
+            CSeq_feat_EditHandle geh(scope.GetSeq_featHandle(*gene));
+            geh.Replace(*new_gene);
+        }
+    }
+    return rval;
+}
+
+
+DISCREPANCY_AUTOFIX(PARTIAL_PROBLEMS)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    NON_CONST_ITERATE(TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* cds = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (cds && ExtendToGapsOrEnds(*cds, scope)) {
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+    return CRef<CAutofixReport>(n ? new CAutofixReport("PARTIAL_PROBLEMS: [n] feature[s] [is] extended to end or gap", n) : 0);
+}
+
+
+// EUKARYOTE_SHOULD_HAVE_MRNA
+
+const string kEukaryoteShouldHavemRNA = "no mRNA present";
+const string kEukaryoticCDSHasMrna = "Eukaryotic CDS has mRNA";
+
+DISCREPANCY_CASE(EUKARYOTE_SHOULD_HAVE_MRNA, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Eukaryote should have mRNA")
+{
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion() || context.IsPseudo(obj)) {
+        return;
+    }
+    if (!context.IsEukaryotic()) {
+        return;
+    }
+    const CMolInfo* molinfo = context.GetCurrentMolInfo();
+    if (!molinfo || !molinfo->IsSetBiomol() || molinfo->GetBiomol() != CMolInfo::eBiomol_genomic) {
+        return;
+    }
+    
+    CConstRef<CSeq_feat> mrna = sequence::GetmRNAforCDS(obj, context.GetScope());
+
+    if (mrna) {
+        m_Objs[kEukaryoticCDSHasMrna].Add(*context.DiscrObj(obj),
+            false);
+    }
+    else if (m_Objs[kEukaryoteShouldHavemRNA].GetObjects().empty()) {
+        m_Objs[kEukaryoteShouldHavemRNA].Add(*context.DiscrObj(obj), false).Fatal();
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(EUKARYOTE_SHOULD_HAVE_MRNA)
+//  ----------------------------------------------------------------------------
+{
+    if (m_Objs.empty()) {
+        return;
+    }
+    if (!m_Objs[kEukaryoteShouldHavemRNA].GetObjects().empty() && m_Objs[kEukaryoticCDSHasMrna].GetObjects().empty()) {
+        m_Objs.GetMap().erase(kEukaryoticCDSHasMrna);
+        m_Objs[kEukaryoteShouldHavemRNA].clearObjs();
+        m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+    }
+}
+
+
+// NON_GENE_LOCUS_TAG
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(NON_GENE_LOCUS_TAG, CSeq_feat, eDisc | eOncaller | eSubmitter | eSmart, "Nongene Locus Tag")
+//  ----------------------------------------------------------------------------
+{
+    if (obj.IsSetData() && obj.GetData().IsGene()) {
+        return;
+    }
+    if (!obj.IsSetQual()) {
+        return;
+    }
+    bool report = false;
+    ITERATE(CSeq_feat::TQual, it, obj.GetQual()) {
+        if ((*it)->IsSetQual() && NStr::EqualNocase((*it)->GetQual(), "locus_tag")) {
+            report = true;
+            break;
+        }
+    }
+    if (report) {
+        m_Objs["[n] non-gene feature[s] [has] locus tag[s]."].Add(*context.DiscrObj(obj));
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(NON_GENE_LOCUS_TAG)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// FIND_BADLEN_TRNAS
+static const string ktRNATooShort = "[n] tRNA[s] [is] too short";
+static const string ktRNATooLong150 = "[n] tRNA[s] [is] too long - over 150 nucleotides";
+
+DISCREPANCY_CASE(FIND_BADLEN_TRNAS, CSeq_feat, eDisc | eOncaller | eSubmitter | eSmart, "Find short and long tRNAs")
+{
+    if (!obj.IsSetData() || obj.GetData().GetSubtype() != CSeqFeatData::eSubtype_tRNA) {
+        return;
+    }
+    TSeqPos len = sequence::GetLength(obj.GetLocation(), &(context.GetScope()));
+    if (!obj.IsSetPartial() && len < 50) {
+        m_Objs[ktRNATooShort].Add(*context.DiscrObj(obj));
+    }
+    else if (len >= 150) {
+        m_Objs[ktRNATooLong150].Add(*context.DiscrObj(obj));
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(FIND_BADLEN_TRNAS)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// ORG_TRNAS
+static const string ktRNATooLong = "[n] tRNA[s] [is] too long";
+
+DISCREPANCY_CASE(ORG_TRNAS, CSeq_feat, eDisc | eOncaller, "Find long tRNAs > 90nt except Ser/Leu/Sec")
+{
+    if (!obj.IsSetData() || obj.GetData().GetSubtype() != CSeqFeatData::eSubtype_tRNA) {
+        return;
+    }
+    TSeqPos len = sequence::GetLength(obj.GetLocation(), &(context.GetScope()));
+    if (len > 90) {
+        const string aa = context.GetAminoacidName(obj);
+        if (aa != "Ser" && aa != "Sec" && aa != "Leu") {
+            m_Objs[ktRNATooLong].Add(*context.DiscrObj(obj));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(ORG_TRNAS)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// GENE_PARTIAL_CONFLICT
+bool IsPartialStartConflict(const CSeq_feat& feat, const CSeq_feat& gene, bool is_mrna = false)
+{
+    bool partial_feat = feat.GetLocation().IsPartialStart(eExtreme_Biological);
+    bool partial_gene = gene.GetLocation().IsPartialStart(eExtreme_Biological);
+    if (partial_feat != partial_gene) {
+        if (is_mrna || feat.GetLocation().GetStart(eExtreme_Biological) == gene.GetLocation().GetStart(eExtreme_Biological)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool IsPartialStopConflict(const CSeq_feat& feat, const CSeq_feat& gene, bool is_mrna = false)
+{
+    bool partial_feat = feat.GetLocation().IsPartialStop(eExtreme_Biological);
+    bool partial_gene = gene.GetLocation().IsPartialStop(eExtreme_Biological);
+    if (partial_feat != partial_gene) {
+        if (is_mrna || feat.GetLocation().GetStop(eExtreme_Biological) == gene.GetLocation().GetStop(eExtreme_Biological)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const string kGenePartialConflictTop = "[n/2] feature location[s] conflict with partialness of overlapping gene";
+const string kGenePartialConflictOther = "[n/2] feature[s] that [is] not coding region[s] or misc_feature[s] conflict with partialness of overlapping gene";
+const string kGenePartialConflictCodingRegion = "[n/2] coding region location[s] conflict with partialness of overlapping gene";
+const string kGenePartialConflictMiscFeat = "[n/2] misc_feature location[s] conflict with partialness of overlapping gene";
+const string kConflictBoth = " feature partialness conflicts with gene on both ends";
+const string kConflictStart = " feature partialness conflicts with gene on 5' end";
+const string kConflictStop = " feature partialness conflicts with gene on 3' end";
+
+
+DISCREPANCY_CASE(GENE_PARTIAL_CONFLICT, COverlappingFeatures, eOncaller | eSubmitter | eSmart, "Feature partialness should agree with gene partialness if endpoints match")
+{
+    const vector<CConstRef<CSeq_feat> >& all = context.FeatAll();
+    ITERATE(vector<CConstRef<CSeq_feat>>, feat, all) {
+        if (!(*feat)->IsSetData()) {
+            continue;
+        }
+        const CSeq_feat* gene = context.GetGeneForFeature(**feat);
+        if (!gene) {
+            continue;
+        }
+        bool conflict_start = false;
+        bool conflict_stop = false;
+        CSeqFeatData::ESubtype subtype = (*feat)->GetData().GetSubtype();
+        string middle_label = kGenePartialConflictOther;
+        if ((*feat)->GetData().IsCdregion()) {
+            bool is_mrna = context.IsCurrentSequenceMrna();
+            if (!context.IsEukaryotic() || is_mrna) {
+                middle_label = kGenePartialConflictCodingRegion;
+                conflict_start = IsPartialStartConflict(**feat, *gene, is_mrna);
+                conflict_stop = IsPartialStopConflict(**feat, *gene, is_mrna);
+                if (is_mrna) {
+                    //look for 5' UTR
+                    TSeqPos gene_start = gene->GetLocation().GetStart(eExtreme_Biological);
+                    bool gene_start_partial = gene->GetLocation().IsPartialStart(eExtreme_Biological);
+                    bool found_start = false;
+                    bool found_utr5 = false;
+                    ITERATE (vector<CConstRef<CSeq_feat>>, fi, all) {
+                        if ((*fi)->IsSetData() && (*fi)->GetData().GetSubtype() == CSeqFeatData::eSubtype_5UTR) {
+                            found_utr5 = true;
+                            if ((*fi)->GetLocation().GetStart(eExtreme_Biological) == gene_start && (*fi)->GetLocation().IsPartialStart(eExtreme_Biological) == gene_start_partial) {
+                                found_start = true;
+                                conflict_start = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (found_utr5 && !found_start) {
+                        conflict_start = true;
+                    }
+                    //look for 3' UTR
+                    TSeqPos gene_stop = gene->GetLocation().GetStop(eExtreme_Biological);
+                    bool gene_stop_partial = gene->GetLocation().IsPartialStop(eExtreme_Biological);
+                    bool found_stop = false;
+                    bool found_utr3 = false;
+                    ITERATE (vector<CConstRef<CSeq_feat>>, fi, all) {
+                        if ((*fi)->IsSetData() && (*fi)->GetData().GetSubtype() == CSeqFeatData::eSubtype_3UTR) {
+                            found_utr3 = true;
+                            if ((*fi)->GetLocation().GetStop(eExtreme_Biological) == gene_stop && (*fi)->GetLocation().IsPartialStop(eExtreme_Biological) == gene_stop_partial) {
+                                found_stop = true;
+                                conflict_stop = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (found_utr3 && !found_stop) {
+                        conflict_stop = true;
+                    }
+                }
+            }
+        }
+        else if ((*feat)->GetData().IsRna() || subtype == CSeqFeatData::eSubtype_intron || subtype == CSeqFeatData::eSubtype_exon || subtype == CSeqFeatData::eSubtype_5UTR || subtype == CSeqFeatData::eSubtype_3UTR || subtype == CSeqFeatData::eSubtype_misc_feature) {
+            conflict_start = IsPartialStartConflict(**feat, *gene);
+            conflict_stop = IsPartialStopConflict(**feat, *gene);
+            if (subtype == CSeqFeatData::eSubtype_misc_feature) {
+                middle_label = kGenePartialConflictMiscFeat;
+            }
+        }
+        if (conflict_start || conflict_stop) {
+            string label = CSeqFeatData::SubtypeValueToName(subtype);
+            label += conflict_start && conflict_stop ? kConflictBoth : conflict_start ? kConflictStart : kConflictStop;
+            m_Objs[kGenePartialConflictTop][middle_label].Ext()[label].Ext().Add(*context.DiscrObj(**feat), false).Add(*context.DiscrObj(*gene), false);
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(GENE_PARTIAL_CONFLICT)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// BAD_GENE_STRAND
+
+bool StrandsMatch(ENa_strand s1, ENa_strand s2)
+{
+    if (s1 == eNa_strand_minus && s2 != eNa_strand_minus) {
+        return false;
+    } else if (s1 != eNa_strand_minus && s2 == eNa_strand_minus) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+bool HasMixedStrands(const CSeq_loc& loc)
+{
+    CSeq_loc_CI li(loc);
+    if (!li) {
+        return false;
+    }
+    ENa_strand first_strand = li.GetStrand();
+    ++li;
+    while (li) {
+        if (!StrandsMatch(li.GetStrand(), first_strand)) {
+            return true;
+        }
+        ++li;
+    }
+    return false;
+}
+
+
+const string kBadGeneStrand = "[n/2] feature location[s] conflict with gene location strand[s]";
+
+
+DISCREPANCY_CASE(BAD_GENE_STRAND, COverlappingFeatures, eOncaller | eSubmitter | eSmart, "Genes and features that share endpoints should be on the same strand")
+{
+    // note - use positional instead of biological, because we are *looking* for objects on the opposite strand
+    const vector<CConstRef<CSeq_feat> >& genes = context.FeatGenes();
+    const vector<CConstRef<CSeq_feat> >& feats = context.FeatAll();
+
+    for (size_t j = 0; j < feats.size(); j++) {
+        CSeqFeatData::ESubtype subtype = feats[j]->GetData().GetSubtype();
+        if (subtype == CSeqFeatData::eSubtype_gene || subtype == CSeqFeatData::eSubtype_primer_bind) {
+            continue;
+        }
+        const CSeq_loc& loc_j = feats[j]->GetLocation();
+        TSeqPos feat_start = loc_j.GetStart(eExtreme_Positional);
+        TSeqPos feat_stop = loc_j.GetStop(eExtreme_Positional);
+        for (size_t i = 0; i < genes.size(); i++) {
+            if (!genes[i]->IsSetLocation()) {
+                continue;
+            }
+            const CSeq_loc& loc_i = genes[i]->GetLocation();
+            ENa_strand strand_i = loc_i.GetStrand();
+            TSeqPos gene_start = loc_i.GetStart(eExtreme_Positional);
+            TSeqPos gene_stop = loc_i.GetStop(eExtreme_Positional);
+            if (feat_start == gene_start || feat_stop == gene_stop) {
+                bool all_ok = true;
+                if (HasMixedStrands(loc_i)) {
+                    // compare intervals, to make sure that for each pair of feature interval and gene interval
+                    // where the gene interval contains the feature interval, the intervals are on the same strand
+                    CSeq_loc_CI f_loc(loc_j);
+                    bool found_bad = false;
+                    while (f_loc && !found_bad) {
+                        CConstRef<CSeq_loc> f_int = f_loc.GetRangeAsSeq_loc();
+                        CSeq_loc_CI g_loc(loc_i);
+                        while (g_loc && !found_bad) {
+                            CConstRef<CSeq_loc> g_int = g_loc.GetRangeAsSeq_loc();
+                            sequence::ECompare cmp = context.Compare(*f_int, *g_int);
+                            if (cmp == sequence::eContained || cmp == sequence::eSame) {
+                                if (!StrandsMatch(f_loc.GetStrand(), g_loc.GetStrand())) {
+                                    found_bad = true;
+                                }
+                            }
+                            ++g_loc;
+                        }
+                        ++f_loc;
+                    }
+                    all_ok = !found_bad;
+                }
+                else {
+                    all_ok = StrandsMatch(loc_j.GetStrand(), strand_i);
+                }
+                if (!all_ok) {
+                    size_t offset = m_Objs[kBadGeneStrand].GetMap().size() + 1;
+                    string label = "Gene and feature strands conflict (pair " + NStr::NumericToString(offset) + ")";
+                    m_Objs[kBadGeneStrand][label].Ext().Add(*context.DiscrObj(*genes[i]), false).Add(*context.DiscrObj(*feats[j]), false);
+                }
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(BAD_GENE_STRAND)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+//MICROSATELLITE_REPEAT_TYPE
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(MICROSATELLITE_REPEAT_TYPE, CSeq_feat_BY_BIOSEQ, eOncaller, "Microsatellites must have repeat type of tandem")
+//  ----------------------------------------------------------------------------
+{
+    if (obj.GetData().GetSubtype() != CSeqFeatData::eSubtype_repeat_region || !obj.IsSetQual())
+        return;
+
+    bool is_microsatellite = false;
+    bool is_tandem = false;
+
+    const CSeq_feat::TQual& quals = obj.GetQual();
+    for (auto it = quals.begin(); it != quals.end() && (!is_microsatellite || !is_tandem); ++it) {
+        const CGb_qual& qual = **it;
+        if (NStr::EqualCase(qual.GetQual(), "satellite")) {
+            if (NStr::EqualNocase(qual.GetVal(), "microsatellite") ||
+                NStr::StartsWith(qual.GetVal(), "microsatellite:", NStr::eNocase)) {
+                is_microsatellite = true;
+            }
+        }
+        else if (NStr::EqualCase(qual.GetQual(), "rpt_type")) {
+            is_tandem = NStr::EqualCase(qual.GetVal(), "tandem");
+        }
+    }
+
+    if (is_microsatellite && !is_tandem) {
+        m_Objs["[n] microsatellite[s] do not have a repeat type of tandem"].Add(*context.DiscrObj(obj), false).Fatal();
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(MICROSATELLITE_REPEAT_TYPE)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+DISCREPANCY_AUTOFIX(MICROSATELLITE_REPEAT_TYPE)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    NON_CONST_ITERATE(TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* sf = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (sf) {
+                CRef<CSeq_feat> new_feat(new CSeq_feat());
+                new_feat->Assign(*sf);
+                CRef<CGb_qual> new_qual(new CGb_qual("rpt_type", "tandem"));
+                new_feat->SetQual().push_back(new_qual);
+                CSeq_feat_EditHandle feh(scope.GetSeq_featHandle(*sf));
+                feh.Replace(*new_feat);
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+    return CRef<CAutofixReport>(n ? new CAutofixReport("MICROSATELLITE_REPEAT_TYPE: added repeat type of tandem to [n] microsatellite[s]", n) : 0);
+}
+
+
+// SUSPICIOUS_NOTE_TEXT
+static const string kSuspiciousNotePhrases[] =
+{
+    "characterised",
+    "recognised",
+    "characterisation",
+    "localisation",
+    "tumour",
+    "uncharacterised",
+    "oxydase",
+    "colour",
+    "localise",
+    "faecal",
+    "orthologue",
+    "paralogue",
+    "homolog",
+    "homologue",
+    "intronless gene"
+};
+
+const size_t kNumSuspiciousNotePhrases = sizeof(kSuspiciousNotePhrases) / sizeof(string);
+
+static const string kSuspiciousNoteTop = "[n] note text[s] contain suspicious phrase[s]";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(SUSPICIOUS_NOTE_TEXT, CSeq_feat, eOncaller, "Find Suspicious Phrases in Note Text")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData()) {
+        return;
+    }
+    for (size_t k = 0; k < kNumSuspiciousNotePhrases; k++) {
+        bool has_phrase = false;
+        switch (obj.GetData().GetSubtype()) {
+            case CSeqFeatData::eSubtype_gene:
+                // look in gene comment and gene description
+                if (obj.IsSetComment() &&
+                    NStr::FindNoCase(obj.GetComment(), kSuspiciousNotePhrases[k]) != string::npos) {
+                    has_phrase = true;
+                } else if (obj.GetData().GetGene().IsSetDesc() &&
+                    NStr::FindNoCase(obj.GetData().GetGene().GetDesc(), kSuspiciousNotePhrases[k]) != string::npos) {
+                    has_phrase = true;
+                }
+                break;
+            case CSeqFeatData::eSubtype_prot:
+                if (obj.GetData().GetProt().IsSetDesc() &&
+                    NStr::FindNoCase(obj.GetData().GetProt().GetDesc(), kSuspiciousNotePhrases[k]) != string::npos) {
+                    has_phrase = true;
+                }
+                break;
+            case CSeqFeatData::eSubtype_cdregion:
+            case CSeqFeatData::eSubtype_misc_feature:
+                if (obj.IsSetComment() &&
+                    NStr::FindNoCase(obj.GetComment(), kSuspiciousNotePhrases[k]) != string::npos) {
+                    has_phrase = true;
+                }
+                break;
+            default:
+                break;
+        }
+        if (has_phrase) {
+            m_Objs[kSuspiciousNoteTop]["[n] note text[s] contain '" + kSuspiciousNotePhrases[k] + "'"].Ext().Add(*context.DiscrObj(obj), false);
+        }
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(SUSPICIOUS_NOTE_TEXT)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// CDS_HAS_NEW_EXCEPTION
+
+const string kCDSHasNewException = "[n] coding region[s] [has] new exception[s]";
+
+static const string kNewExceptions[] =
+{
+    "annotated by transcript or proteomic data",
+    "heterogeneous population sequenced",
+    "low-quality sequence region",
+    "unextendable partial coding region",
+};
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(CDS_HAS_NEW_EXCEPTION, CSeq_feat, eDisc | eOncaller | eSmart, "Coding region has new exception")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion() || !obj.IsSetExcept_text()) {
+        return;
+    }
+    size_t max = sizeof(kNewExceptions) / sizeof(string);
+    bool found = false;
+    for (size_t i = 0; i < max; i++) {
+        if (NStr::FindNoCase(obj.GetExcept_text(), kNewExceptions[i]) != string::npos) {
+            found = true;
+            break;
+        }
+    }
+    if (found) {
+        m_Objs[kCDSHasNewException].Add(*context.DiscrObj(obj), false);
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(CDS_HAS_NEW_EXCEPTION)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// SHORT_LNCRNA
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(SHORT_LNCRNA, CSeq_feat, eDisc | eOncaller | eSubmitter | eSmart, "Short lncRNA sequences")
+//  ----------------------------------------------------------------------------
+{
+    // only looking at lncrna features
+    if (!obj.IsSetData() || 
+        obj.GetData().GetSubtype() != CSeqFeatData::eSubtype_ncRNA ||
+        !obj.GetData().IsRna() ||
+        !obj.GetData().GetRna().IsSetExt() ||
+        !obj.GetData().GetRna().GetExt().IsGen() || 
+        !obj.GetData().GetRna().GetExt().GetGen().IsSetClass() ||
+        !NStr::EqualNocase(obj.GetData().GetRna().GetExt().GetGen().GetClass(), "lncrna")) {
+        return;
+    }
+    // ignore if partial
+    if (obj.GetLocation().IsPartialStart(eExtreme_Biological) ||
+        obj.GetLocation().IsPartialStop(eExtreme_Biological)) {
+        return;
+    }
+
+    if (sequence::GetLength(obj.GetLocation(), &(context.GetScope())) < 200) {
+        m_Objs["[n] lncRNA feature[s] [is] suspiciously short"].Add(*context.DiscrObj(obj), false);
+    }
+}
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(SHORT_LNCRNA)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// JOINED_FEATURES
+
+const string& kJoinedFeatures = "[n] feature[s] [has] joined location[s].";
+const string& kJoinedFeaturesNoException = "[n] feature[s] [has] joined location but no exception";
+const string& kJoinedFeaturesException = "[n] feature[s] [has] joined location but exception '";
+const string& kJoinedFeaturesBlankException = "[n] feature[s] [has] joined location but a blank exception";
+
+DISCREPANCY_CASE(JOINED_FEATURES, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Joined Features: on when non-eukaryote")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || !obj.IsSetLocation()) {
+        return;
+    }
+    if (obj.GetLocation().IsMix() || obj.GetLocation().IsPacked_int()) {
+        if (obj.IsSetExcept_text()) {
+            if (NStr::IsBlank(obj.GetExcept_text())) {
+                m_Objs[kJoinedFeatures][kJoinedFeaturesBlankException].Ext().Add(*context.DiscrObj(obj));
+            } else {
+                m_Objs[kJoinedFeatures][kJoinedFeaturesException + obj.GetExcept_text() + "'"].Ext().Add(*context.DiscrObj(obj));
+            }
+        } else if (obj.IsSetExcept() && obj.GetExcept()) {
+            m_Objs[kJoinedFeatures][kJoinedFeaturesBlankException].Ext().Add(*context.DiscrObj(obj));
+        } else {
+            m_Objs[kJoinedFeatures][kJoinedFeaturesNoException].Ext().Add(*context.DiscrObj(obj));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(JOINED_FEATURES)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// BACTERIAL_JOINED_FEATURES_NO_EXCEPTION
+
+DISCREPANCY_CASE(BACTERIAL_JOINED_FEATURES_NO_EXCEPTION, CSeq_feat_BY_BIOSEQ, eDisc | eSubmitter | eSmart, "Joined Features on prokaryote without exception")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || context.IsPseudo(obj) || !obj.IsSetLocation() || !obj.CanGetData() || !obj.GetData().IsCdregion()) {
+        return;
+    }
+    if (obj.GetLocation().IsMix() || obj.GetLocation().IsPacked_int()) {
+        if ((obj.IsSetExcept_text() && !obj.GetExcept_text().empty()) || (obj.IsSetExcept() && obj.GetExcept())) {
+            return;
+        }
+        bool bad = true;
+        if (context.GetCurrentBioseq()->CanGetInst()) {
+            const CSeq_inst& inst = context.GetCurrentBioseq()->GetInst();
+            if (inst.GetTopology() == CSeq_inst::eTopology_circular) {
+                unsigned int len = inst.GetLength();
+                CSeq_loc_CI ci0(obj.GetLocation());
+                if (ci0) {
+                    CSeq_loc_CI ci1 = ci0;
+                    ++ci1;
+                    if (ci1) {
+                        CSeq_loc_CI ci2 = ci1;
+                        ++ci2;
+                        if (!ci2) { // location has exactly 2 intervals
+                            if (ci0.GetStrand() == eNa_strand_plus && ci1.GetStrand() == eNa_strand_plus) {
+                                if (ci0.GetRange().GetTo() == len - 1 && ci1.GetRange().GetFrom() == 0) {
+                                    bad = false;
+                                }
+                            }
+                            else if (ci0.GetStrand() == eNa_strand_minus && ci1.GetStrand() == eNa_strand_minus) {
+                                if (ci1.GetRange().GetTo() == len - 1 && ci0.GetRange().GetFrom() == 0) {
+                                    bad = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        m_Objs["[n] coding region[s] with joined location[s] [has] no exception[s]"][bad ? "[n] coding region[s] not over the origin of circular DNA" : "[n] coding region[s] over the origin of circular DNA"].Severity(bad ? CReportItem::eSeverity_error : CReportItem::eSeverity_warning).Add(*context.DiscrObj(obj));
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(BACTERIAL_JOINED_FEATURES_NO_EXCEPTION)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// RIBOSOMAL_SLIPPAGE
+
+DISCREPANCY_CASE(RIBOSOMAL_SLIPPAGE, CSeq_feat_BY_BIOSEQ, eDisc | eSmart, " Only a select number of proteins undergo programmed frameshifts due to ribosomal slippage")
+{
+    if (context.IsEukaryotic() || context.IsOrganelle() || !obj.IsSetLocation() || !obj.CanGetData() || !obj.GetData().IsCdregion() || !obj.IsSetExcept_text()) {
+        return;
+    }
+    if (obj.GetLocation().IsMix() || obj.GetLocation().IsPacked_int()) {
+        if (obj.GetExcept_text().find("ribosomal slippage") != string::npos) {
+            string product = GetProductForCDS(obj, context.GetScope()); // sema: may need to change when we start using CFeatTree
+            static string ignore1[] = { "transposase", "chain release" };
+            static string ignore2[] = { "IS150 protein InsAB", "PCRF domain-containing protein" };
+            static size_t len1 = sizeof(ignore1) / sizeof(ignore1[0]);
+            static size_t len2 = sizeof(ignore2) / sizeof(ignore2[0]);
+            for (size_t n = 0; n < len1; n++) {
+                if (product.find(ignore1[n]) != string::npos) {
+                    return;
+                }
+            }
+            for (size_t n = 0; n < len2; n++) {
+                if (product == ignore2[n]) {
+                    return;
+                }
+            }
+            m_Objs["[n] coding region[s] [has] unexpected ribosomal slippage"].Fatal().Add(*context.DiscrObj(obj));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(RIBOSOMAL_SLIPPAGE)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// SHORT_INTRON
+const string kShortIntronTop = "[n] intron[s] [is] shorter than 10 nt";
+const string kShortIntronExcept = "[n] intron[s] [is] shorter than 11 nt and [has] an exception";
+
+//"Introns shorter than 10 nt", "DISC_SHORT_INTRON", FindShortIntrons, AddExceptionsToShortIntrons},
+
+DISCREPANCY_CASE(SHORT_INTRON, CSeq_feat, eDisc | eOncaller | eSubmitter | eSmart, "Introns shorter than 10 nt")
+{
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion() || !obj.IsSetLocation() || obj.IsSetExcept()) {
+        return;
+    }
+    if (context.IsPseudo(obj)) {
+        return;
+    }
+    // looking at space between coding region intervals
+
+    CSeq_loc_CI li(obj.GetLocation());
+    if (!li) {
+        return;
+    }
+    bool found_short = false;
+    TSeqPos last_start = li.GetRange().GetFrom();
+    TSeqPos last_stop = li.GetRange().GetTo();
+    ++li;
+    while (li && !found_short) {
+        TSeqPos start = li.GetRange().GetFrom();
+        TSeqPos stop = li.GetRange().GetTo();
+        if (start >= last_stop && start - last_stop < 11) {
+            found_short = true;
+        } else if (last_stop >= start && last_stop - start < 11) {
+            found_short = true;
+        } else if (stop >= last_start && stop - last_start < 11) {
+            found_short = true;
+        } else if (last_start >= stop && last_start - stop < 11) {
+            found_short = true;
+        }
+        last_start = start;
+        last_stop = stop;
+        ++li;
+    }
+
+    if (found_short) {
+        if (obj.IsSetExcept() && obj.GetExcept()) {
+            m_Objs[kShortIntronTop][kShortIntronExcept].Ext().Add(*context.DiscrObj(obj, true));
+        }
+        else {
+            m_Objs[kShortIntronTop].Add(*context.DiscrObj(obj, true));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(SHORT_INTRON)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+static const string kPutativeFrameShift = "putative frameshift";
+
+static void AddException(const CSeq_feat& sf, CScope& scope, const string& exception_text)
+{
+    CRef<CSeq_feat> new_feat(new CSeq_feat());
+    new_feat->Assign(sf);
+    if (new_feat->IsSetExcept_text() && !NStr::IsBlank(new_feat->GetExcept_text())) {
+        new_feat->SetExcept_text(new_feat->GetExcept_text() + "; " + exception_text);
+    } else {
+        new_feat->SetExcept_text(exception_text);
+    }
+    new_feat->SetExcept(true);
+    CSeq_feat_EditHandle feh(scope.GetSeq_featHandle(sf));
+    feh.Replace(*new_feat);
+}
+
+
+static void AdjustBacterialGeneForCodingRegionWithShortIntron(CSeq_feat& sf, CSeq_feat& gene, bool is_bacterial)
+{
+    if (sf.IsSetComment() && !NStr::IsBlank(sf.GetComment())) {
+        if (gene.IsSetComment() && !NStr::IsBlank(gene.GetComment())) {
+            gene.SetComment(sf.GetComment() + ';' + gene.GetComment());
+        }
+        else {
+            gene.ResetComment();
+
+            if (sf.IsSetComment()) {
+                gene.SetComment(sf.GetComment());
+                sf.ResetComment();
+            }
+
+            if (is_bacterial) {
+                sf.SetComment("contains short intron that may represent a frameshift");
+            }
+        }
+    }
+
+    if (!gene.IsSetComment() || NStr::Find(gene.GetComment(), kPutativeFrameShift) == NPOS) {
+        if (gene.IsSetComment() && !NStr::IsBlank(gene.GetComment())) {
+            gene.SetComment(kPutativeFrameShift + ';' + gene.GetComment());
+        }
+        else {
+            gene.ResetComment();
+
+            if (sf.IsSetComment()) {
+                gene.SetComment(sf.GetComment());
+                sf.ResetComment();
+            }
+
+            if (is_bacterial) {
+                sf.SetComment("contains short intron that may represent a frameshift");
+            }
+        }
+    }
+}
+
+
+static void ConvertToMiscFeature(CSeq_feat& sf, CScope& scope)
+{
+    if (sf.IsSetData()) {
+
+        if (sf.GetData().IsCdregion() || sf.GetData().IsRna()) {
+
+            string prod_name;
+            if (sf.GetData().IsCdregion()) {
+                prod_name = GetProductName(sf, scope);
+                sf.ResetProduct();
+            }
+            else {
+                prod_name = sf.GetData().GetRna().GetRnaProductName();
+            }
+
+            if (!NStr::IsBlank(prod_name)) {
+                if (sf.IsSetComment()) {
+                    sf.SetComment(prod_name + ';' + sf.GetComment());
+                }
+                else {
+                    sf.SetComment(prod_name);
+                }
+            }
+
+            sf.ResetData();
+            sf.SetData().SetImp().SetKey("misc_feature");
+        }
+    }
+}
+
+
+static bool AddExceptionsToShortIntron(const CSeq_feat& sf, CScope& scope, std::list<CConstRef<CSeq_loc>>& to_remove)
+{
+    bool rval = false;
+    const CBioSource* source = nullptr;
+    {
+        CBioseq_Handle bsh;
+        try {
+            bsh = scope.GetBioseqHandle(sf.GetLocation());
+        }
+        catch (CException&) {
+            return false;
+        }
+        CSeqdesc_CI src(bsh, CSeqdesc::e_Source);
+        if (src) {
+            source = &src->GetSource();
+        }
+    }
+    if (source) {
+        if (source->IsSetGenome() && source->GetGenome() == CBioSource::eGenome_mitochondrion) {
+            return false;
+        }
+        bool is_bacterial = CDiscrepancyContext::HasLineage(*source, "", "Bacteria");
+        if (is_bacterial || CDiscrepancyContext::HasLineage(*source, "", "Archea")) {
+            CConstRef<CSeq_feat> gene = sequence::GetGeneForFeature(sf, scope);
+            if (gene.NotEmpty()) {
+                CSeq_feat* gene_edit = const_cast<CSeq_feat*>(gene.GetPointer());
+                CSeq_feat& sf_edit = const_cast<CSeq_feat&>(sf);
+                rval = true;
+                gene_edit->SetPseudo(true);
+                AdjustBacterialGeneForCodingRegionWithShortIntron(sf_edit, *gene_edit, is_bacterial);
+                // Merge gene's location
+                if (gene_edit->IsSetLocation()) {
+                    CRef<CSeq_loc> new_loc = gene_edit->SetLocation().Merge(CSeq_loc::fMerge_All, nullptr);
+                    if (new_loc.NotEmpty()) {
+                        gene_edit->SetLocation().Assign(*new_loc);
+                    }
+                }
+                if (sf.IsSetProduct()) {
+                    to_remove.push_back(CConstRef<CSeq_loc>(&sf.GetProduct()));
+                }
+                if (is_bacterial) {
+                    ConvertToMiscFeature(sf_edit, scope);
+                }
+                else {
+                    CSeq_feat_EditHandle sf_handle(scope.GetSeq_featHandle(sf));
+                    sf_handle.Remove();
+                }
+            }
+            return rval;
+        }
+    }
+    if (!sf.IsSetExcept_text() || NStr::Find(sf.GetExcept_text(), "low-quality sequence region") == string::npos) {
+        AddException(sf, scope, "low-quality sequence region");
+        rval = true;
+    }
+    return rval;
+}
+
+
+DISCREPANCY_AUTOFIX(SHORT_INTRON)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    std::list<CConstRef<CSeq_loc>> to_remove;
+
+    NON_CONST_ITERATE(TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* sf = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (sf && AddExceptionsToShortIntron(*sf, scope, to_remove)) {
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+
+    ITERATE(std::list<CConstRef<CSeq_loc>>, loc, to_remove) {
+        CBioseq_Handle bioseq_h = scope.GetBioseqHandle(**loc);
+        CBioseq_EditHandle bioseq_edit = bioseq_h.GetEditHandle();
+        bioseq_edit.Remove();
+    }
+
+    return CRef<CAutofixReport>(n ? new CAutofixReport("SHORT_INTRON: Set exception for [n] feature[s]", n) : 0);
+}
+
+
+// UNNECESSARY_VIRUS_GENE
+
+DISCREPANCY_CASE(UNNECESSARY_VIRUS_GENE, CSeq_feat, eOncaller, "Unnecessary gene features on virus: on when lineage is not Picornaviridae,Potyviridae,Flaviviridae and Togaviridae")
+{
+    if (!obj.IsSetData() || !obj.GetData().IsGene()) {
+        return;
+    }
+    if (context.HasLineage("Picornaviridae") ||
+        context.HasLineage("Potyviridae") ||
+        context.HasLineage("Flaviviridae") ||
+        context.HasLineage("Togaviridae")) {
+        m_Objs["[n] virus gene[s] need to be removed"].Add(*context.DiscrObj(obj), false);
+    }
+
+}
+
+
+DISCREPANCY_SUMMARIZE(UNNECESSARY_VIRUS_GENE)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// CDS_HAS_CDD_XREF
+
+DISCREPANCY_CASE(CDS_HAS_CDD_XREF, CSeq_feat, eDisc | eOncaller, "CDS has CDD Xref")
+{
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion() || !obj.IsSetDbxref()) {
+        return;
+    }
+    bool has_cdd_xref = false;
+    ITERATE(CSeq_feat::TDbxref, x, obj.GetDbxref()) {
+        if ((*x)->IsSetDb() && NStr::EqualNocase((*x)->GetDb(), "CDD")) {
+            has_cdd_xref = true;
+            break;
+        }
+    }
+
+    if (has_cdd_xref) {
+        m_Objs["[n] feature[s] [has] CDD Xrefs"].Add(*context.DiscrObj(obj), false);
+    }
+
+}
+
+
+DISCREPANCY_SUMMARIZE(CDS_HAS_CDD_XREF)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// SHOW_TRANSL_EXCEPT
+
+static const string kShowTranslExc = "[n] coding region[s] [has] a translation exception";
+
+DISCREPANCY_CASE(SHOW_TRANSL_EXCEPT, CSeq_feat, eDisc | eSubmitter | eSmart, "Show translation exception")
+{
+    if (!obj.IsSetData() || !obj.GetData().IsCdregion()) {
+        return;
+    }
+
+    if (obj.GetData().GetCdregion().IsSetCode_break()) {
+        m_Objs[kShowTranslExc].Add(*context.DiscrObj(obj), false);
+    }
+
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(SHOW_TRANSL_EXCEPT)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// NO_PRODUCT_STRING
+
+static const string kNoProductStr = "[n] product[s] [has] \"no product string in file\"";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(NO_PRODUCT_STRING, CSeq_feat, eDisc, "Product has string \"no product string in file\"")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData() || !obj.GetData().IsProt()) {
+        return;
+    }
+
+    const CProt_ref& prot = obj.GetData().GetProt();
+
+    if (prot.IsSetName()) {
+
+        const string* no_prot_str = NStr::FindNoCase(prot.GetName(), "no product string in file");
+        if (no_prot_str != nullptr) {
+            const CSeq_feat* product = sequence::GetCDSForProduct(*context.GetCurrentBioseq(), &context.GetScope());
+            if (product != nullptr) {
+                m_Objs[kNoProductStr].Add(*context.DiscrObj(*product), false);
+            }
+        }
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(NO_PRODUCT_STRING)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// DISC_SHORT_RRNA
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(UNWANTED_SPACER, CSeq_feat_BY_BIOSEQ, eOncaller, "Intergenic spacer without plastid location")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData() || obj.GetData().GetSubtype() != CSeqFeatData::eSubtype_misc_feature ||
+        !obj.IsSetComment()) {
+        return;
+    }
+    static string kIntergenicSpacerNames[] = {
+        "trnL-trnF intergenic spacer",
+        "trnH-psbA intergenic spacer",
+        "trnS-trnG intergenic spacer",
+        "trnF-trnL intergenic spacer",
+        "psbA-trnH intergenic spacer",
+        "trnG-trnS intergenic spacer"};
+
+    size_t num_names = sizeof(kIntergenicSpacerNames) / sizeof(string);
+    bool found = false;
+    for (size_t i = 0; i < num_names && !found; i++) {
+        if (NStr::FindNoCase(obj.GetComment(), kIntergenicSpacerNames[i]) != string::npos) {
+            found = true;
+        }
+    }
+
+    if (!found) {
+        return;
+    }
+
+    const CBioSource* src = context.GetCurrentBiosource();
+    if (src && src->IsSetGenome() &&
+        (src->GetGenome() == CBioSource::eGenome_chloroplast || src->GetGenome() == CBioSource::eGenome_plastid)) {
+        return;
+    }
+    if (src && src->IsSetOrg() && src->GetOrg().IsSetTaxname() &&
+        CDiscrepancyContext::IsUnculturedNonOrganelleName(src->GetOrg().GetTaxname())) {
+        return;
+    }
+
+    m_Objs["[n] suspect intergenic spacer note[s] not organelle"].Add(*context.DiscrObj(obj), false);
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(UNWANTED_SPACER)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// CHECK_RNA_PRODUCTS_AND_COMMENTS
+
+static const string kFeatureHasWeirdStr = "[n] RNA product_name or comment[s] contain[S] 'suspect phrase'";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(CHECK_RNA_PRODUCTS_AND_COMMENTS, CSeq_feat, eOncaller, "Check for gene or genes in rRNA and tRNA products and comments")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData() || !obj.GetData().IsRna()) {
+        return;
+    }
+
+    const CRNA_ref& rna = obj.GetData().GetRna();
+    if (rna.IsSetType() && rna.GetType() != CRNA_ref::eType_rRNA && rna.GetType() != CRNA_ref::eType_tRNA) {
+        return;
+    }
+
+    string product = rna.GetRnaProductName();
+    string comment;
+    if (obj.IsSetComment()) {
+        comment = obj.GetComment();
+    }
+
+    if (NStr::FindNoCase(product, "gene") != NPOS || NStr::FindNoCase(comment, "gene") != NPOS) {
+        m_Objs[kFeatureHasWeirdStr].Add(*context.DiscrObj(obj), false);
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(CHECK_RNA_PRODUCTS_AND_COMMENTS)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// FEATURE_LOCATION_CONFLICT
+
+const string kFeatureLocationConflictTop = "[n] feature[s] [has] inconsistent gene location[s].";
+const string kFeatureLocationCodingRegion = "Coding region location does not match gene location";
+const string kFeatureLocationRNA = "RNA feature location does not match gene location";
+
+bool IsMixedStrand(const CSeq_loc& loc)
+{
+    CSeq_loc_CI li(loc);
+    if (!li) {
+        return false;
+    }
+    ENa_strand first_strand = li.GetStrand();
+    if (first_strand == eNa_strand_unknown) {
+        first_strand = eNa_strand_plus;
+    }
+    ++li;
+    while (li) {
+        ENa_strand this_strand = li.GetStrand();
+        if (this_strand == eNa_strand_unknown) {
+            this_strand = eNa_strand_plus;
+        }
+        if (this_strand != first_strand) {
+            return true;
+        }
+        ++li;
+    }
+    return false;
+}
+
+
+bool IsMixedStrandGeneLocationOk(const CSeq_loc& feat_loc, const CSeq_loc& gene_loc)
+{
+    CSeq_loc_CI feat_i(feat_loc);
+    CSeq_loc_CI gene_i(gene_loc);
+
+    while (feat_i && gene_i) {
+        ENa_strand gene_strand = gene_i.GetStrand();
+        if (!StrandsMatch(feat_i.GetStrand(), gene_strand) ||
+            feat_i.GetRangeAsSeq_loc()->GetStart(eExtreme_Biological) != gene_i.GetRangeAsSeq_loc()->GetStart(eExtreme_Biological)) {
+            return false;
+        }
+        bool found_stop = false;
+        while (!found_stop && feat_i && StrandsMatch(feat_i.GetStrand(), gene_strand)) {
+            if (feat_i.GetRangeAsSeq_loc()->GetStop(eExtreme_Biological) == gene_i.GetRangeAsSeq_loc()->GetStop(eExtreme_Biological)) {
+                found_stop = true;
+            }
+            ++feat_i;
+        }
+        if (!found_stop) {
+            return false;
+        }
+        ++gene_i;
+    }
+    if ((feat_i && !gene_i) || (!feat_i && gene_i)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+bool StopAbutsGap(const CSeq_loc& loc, ENa_strand strand, CScope& scope)
+{
+    try {
+        CBioseq_Handle bsh = scope.GetBioseqHandle(loc);
+        TSeqPos stop = loc.GetStop(eExtreme_Biological);
+        if (stop < 1 || stop > bsh.GetBioseqLength() - 2) {
+            return false;
+        }
+        CRef<CSeq_loc> search(new CSeq_loc());
+        search->SetInt().SetId().Assign(*(loc.GetId()));
+        if (strand == eNa_strand_minus) {
+            search->SetInt().SetFrom(stop - 1);
+            search->SetInt().SetTo(stop - 1);
+            search->SetInt().SetStrand(eNa_strand_minus);
+        } else {
+            search->SetInt().SetFrom(stop + 1);
+            search->SetInt().SetTo(stop + 1);
+        }
+        CSeqVector vec(*search, scope);
+        if (vec.size() && vec.IsInGap(0)) {
+            return true;
+        }
+    } catch (CException& ) {
+        // unable to calculate
+    }
+    return false;
+}
+
+
+bool StartAbutsGap(const CSeq_loc& loc, ENa_strand strand, CScope& scope)
+{
+    try {
+        CBioseq_Handle bsh = scope.GetBioseqHandle(loc);
+        TSeqPos start = loc.GetStart(eExtreme_Biological);
+        if (start < 1 || start > bsh.GetBioseqLength() - 2) {
+            return false;
+        }
+        CRef<CSeq_loc> search(new CSeq_loc());
+        search->SetInt().SetId().Assign(*(loc.GetId()));
+        if (strand == eNa_strand_minus) {
+            search->SetInt().SetFrom(start + 1);
+            search->SetInt().SetTo(start + 1);
+            search->SetInt().SetStrand(eNa_strand_minus);
+        } else {
+            search->SetInt().SetFrom(start - 1);
+            search->SetInt().SetTo(start - 1);
+        }
+        CSeqVector vec(*search, scope);
+        if (vec.IsInGap(0)) {
+            return true;
+        }
+    } catch (CException& ) {
+        // unable to calculate
+    }
+    return false;
+}
+
+
+// location is ok if:
+// 1. endpoints match exactly, or 
+// 2. non-matching 5' endpoint can be extended by an RBS feature to match gene start, or
+// 3. if coding region non-matching endpoints are partial and abut a gap
+bool IsGeneLocationOk(const CSeq_loc& feat_loc, const CSeq_loc& gene_loc, ENa_strand feat_strand, ENa_strand gene_strand, bool is_coding_region, CScope& scope, const vector<CConstRef<CSeq_feat> >& features)
+{
+    if (IsMixedStrand(feat_loc) || IsMixedStrand(gene_loc)) {
+        // special handling for trans-spliced
+        return IsMixedStrandGeneLocationOk(feat_loc, gene_loc);
+    } else if (!StrandsMatch(feat_strand, gene_strand)) {
+        return false;
+    } else if (gene_loc.GetStop(eExtreme_Biological) != feat_loc.GetStop(eExtreme_Biological)) {
+        if (is_coding_region && feat_loc.IsPartialStop(eExtreme_Biological) && StopAbutsGap(feat_loc, feat_strand, scope)) {
+            // ignore for now
+        } else {
+            return false;
+        }
+    } 
+    TSeqPos gene_start = gene_loc.GetStart(eExtreme_Biological);
+    TSeqPos feat_start = feat_loc.GetStart(eExtreme_Biological);
+
+    if (gene_start == feat_start) {
+        return true;
+    }
+
+    CRef<CSeq_loc> rbs_search(new CSeq_loc());
+    const CSeq_id* id = gene_loc.GetId();
+    if (!id) {
+        return false;
+    }
+    rbs_search->SetInt().SetId().Assign(*id);
+    if (feat_loc.GetStrand() == eNa_strand_minus) {
+        if (gene_start < feat_start) {
+            return false;
+        }
+        rbs_search->SetInt().SetFrom(feat_start + 1);
+        rbs_search->SetInt().SetTo(gene_start);
+        rbs_search->SetStrand(eNa_strand_minus);
+    } else {
+        if (gene_start > feat_start) {
+            return false;
+        }
+        rbs_search->SetInt().SetFrom(gene_start);
+        rbs_search->SetInt().SetTo(feat_start - 1);
+    }
+    TSeqPos rbs_start = rbs_search->GetStart(eExtreme_Biological);
+    ITERATE (vector<CConstRef<CSeq_feat>>, feat, features) {
+        if ((*feat)->GetLocation().GetStart(eExtreme_Biological) == rbs_start && IsRBS(**feat)) {
+            return true;
+        }
+    }
+    if (is_coding_region && feat_loc.IsPartialStart(eExtreme_Biological) && StartAbutsGap(feat_loc, feat_strand, scope)) {
+        // check to see if 5' end is partial and abuts gap
+        return true;
+    }
+    return false;
+}
+
+
+bool GeneRefMatch(const CGene_ref& g1, const CGene_ref& g2)
+{
+    return g1.IsSetLocus() == g2.IsSetLocus() && (!g1.IsSetLocus() || g1.GetLocus() == g2.GetLocus())
+        && g1.IsSetLocus_tag() == g2.IsSetLocus_tag() && (!g1.IsSetLocus_tag() || g1.GetLocus_tag() == g2.GetLocus_tag())
+        && g1.IsSetAllele() == g2.IsSetAllele() && (!g1.IsSetAllele() || g1.GetAllele() == g2.GetAllele())
+        && g1.IsSetDesc() == g2.IsSetDesc() && (!g1.IsSetDesc() || g1.GetDesc() == g2.GetDesc())
+        && g1.IsSetMaploc() == g2.IsSetMaploc() && (!g1.IsSetMaploc() || g1.GetMaploc() == g2.GetMaploc())
+        && g1.IsSetPseudo() == g2.IsSetPseudo()
+    ;
+}
+
+
+static string GetNextSubitemId(size_t num)
+{
+    string ret = "[*";
+    ret += NStr::SizetToString(num);
+    ret += "*]";
+    return ret;
+}
+
+
+DISCREPANCY_CASE(FEATURE_LOCATION_CONFLICT, COverlappingFeatures, eDisc | eSubmitter | eSmart, "Feature Location Conflict")
+{
+    if (context.IsCurrentRnaInGenProdSet()) {
+        return;
+    }
+    bool eucariotic = context.IsEukaryotic();
+    const vector<CConstRef<CSeq_feat> >& all = context.FeatAll();
+    ITERATE (vector<CConstRef<CSeq_feat>>, feat, all) {
+        if ((*feat)->IsSetData() && (*feat)->IsSetLocation() && ((*feat)->GetData().IsRna() || (!eucariotic && (*feat)->GetData().IsCdregion()))) {
+            ENa_strand feat_strand = (*feat)->GetLocation().GetStrand();
+            const CGene_ref* gx = (*feat)->GetGeneXref();
+            const CSeq_feat* gene = context.GetGeneForFeature(**feat);
+            if (!gene || (gx && !gx->IsSuppressed() && !GeneRefMatch(*gx, gene->GetData().GetGene()))) {
+                if ((*feat)->GetGeneXref()) {
+                    string subitem_id = GetNextSubitemId(m_Objs[kFeatureLocationConflictTop].GetMap().size());
+                    if ((*feat)->GetData().IsCdregion()) {
+                        m_Objs[kFeatureLocationConflictTop]["Coding region xref gene does not exist" + subitem_id].Ext().Add(*context.DiscrObj(**feat), false);
+                    }
+                    else {
+                        m_Objs[kFeatureLocationConflictTop]["RNA feature xref gene does not exist" + subitem_id].Ext().Add(*context.DiscrObj(**feat), false);
+                    }
+                    m_Objs[kFeatureLocationConflictTop].Incr();
+                }
+            }
+            else if (gene->IsSetLocation()) {
+                ENa_strand gene_strand = gene->GetLocation().GetStrand();
+                if (!IsGeneLocationOk((*feat)->GetLocation(), gene->GetLocation(), feat_strand, gene_strand, (*feat)->GetData().IsCdregion(), context.GetScope(), all)) {
+                    string subitem_id = GetNextSubitemId(m_Objs[kFeatureLocationConflictTop].GetMap().size());
+                    if ((*feat)->GetData().IsCdregion()) {
+                        m_Objs[kFeatureLocationConflictTop][kFeatureLocationCodingRegion + subitem_id].Ext().Add(*context.DiscrObj(**feat), false).Add(*context.DiscrObj(*gene), false);
+                    }
+                    else {
+                        m_Objs[kFeatureLocationConflictTop][kFeatureLocationRNA + subitem_id].Ext().Add(*context.DiscrObj(**feat), false).Add(*context.DiscrObj(*gene), false);
+                    }
+                    m_Objs[kFeatureLocationConflictTop].Incr();
+                }
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(FEATURE_LOCATION_CONFLICT)
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// SUSPECT_PHRASES
+
+const string suspect_phrases[] =
+{
+    "fragment",
+    "frameshift",
+    "%",
+    "E-value",
+    "E value",
+    "Evalue",
+    "..."
+};
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(SUSPECT_PHRASES, CSeq_feat, eDisc | eSubmitter | eSmart, "Suspect Phrases")
+//  ----------------------------------------------------------------------------
+{
+    if (!obj.IsSetData()) {
+        return;
+    }
+    string check = kEmptyStr;
+    if (obj.GetData().IsCdregion() && obj.IsSetComment()) {
+        check = obj.GetComment();
+    } else if (obj.GetData().IsProt() && obj.GetData().GetProt().IsSetDesc()) {
+        check = obj.GetData().GetProt().GetDesc();
+    }
+    if (NStr::IsBlank(check)) {
+        return;
+    }
+
+    for (size_t i = 0; i < sizeof(suspect_phrases) / sizeof(string); i++) {
+        if (NStr::FindNoCase(check, suspect_phrases[i]) != string::npos) {
+            m_Objs["[n] cds comment[s] or protein description[s] contain[S] suspect_phrase[s]"]
+                ["[n] cds comment[s] or protein description[s] contain[S] '" + suspect_phrases[i] + "'"].Summ().Add(*context.DiscrObj(obj), false);
+            break;
+        }
+    }
+
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(SUSPECT_PHRASES)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this, false)->GetSubitems();
+}
+
+
+// UNUSUAL_MISC_RNA
+
+const string kUnusualMiscRNA = "[n] unexpected misc_RNA feature[s] found.  misc_RNAs are unusual in a genome, consider using ncRNA, misc_binding, or misc_feature as appropriate";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(UNUSUAL_MISC_RNA, CSeq_feat, eDisc | eSubmitter | eSmart, "Unexpected misc_RNA features")
+//  ----------------------------------------------------------------------------
+{
+    if (obj.IsSetData() && obj.GetData().GetSubtype() == CSeqFeatData::eSubtype_otherRNA) {
+
+        const CRNA_ref& rna = obj.GetData().GetRna();
+        string product = rna.GetRnaProductName();
+
+        if (NStr::FindCase(product, "ITS", 0) == NPOS && NStr::FindCase(product, "internal transcribed spacer", 0) == NPOS) {
+            m_Objs[kUnusualMiscRNA].Add(*context.DiscrObj(obj), false);
+        }
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(UNUSUAL_MISC_RNA)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// CDS_WITHOUT_MRNA
+
+const string kCDSWithoutMRNA = "[n] coding region[s] [does] not have an mRNA";
+
+static bool IsProductMatch(const string& rna_product, const string& cds_product)
+{
+    if (rna_product.empty() || cds_product.empty()) {
+        return false;
+    }
+    if (rna_product == cds_product) {
+        return true;
+    }
+    const string kmRNAVariant = ", transcript variant ";
+    const string kCDSVariant = ", isoform ";
+    size_t pos_in_rna = rna_product.find(kmRNAVariant);
+    size_t pos_in_cds = cds_product.find(kCDSVariant);
+    if (pos_in_rna == string::npos || pos_in_cds == string::npos || pos_in_rna != pos_in_cds ||
+        !NStr::EqualCase(rna_product, 0, pos_in_rna, cds_product)) {
+        return false;
+    }
+    string rna_rest = rna_product.substr(pos_in_rna + kmRNAVariant.size()), cds_rest = cds_product.substr(pos_in_cds + kCDSVariant.size());
+    return rna_rest == cds_rest;
+}
+
+
+DISCREPANCY_CASE(CDS_WITHOUT_MRNA, COverlappingFeatures, eDisc | eOncaller | eSmart, "Coding regions on eukaryotic genomic DNA should have mRNAs with matching products")
+{
+    if (!context.IsEukaryotic() || !context.IsDNA() || context.IsOrganelle()) {
+        return;
+    }
+    const vector<CConstRef<CSeq_feat> >& cds = context.FeatCDS();
+    const vector<CConstRef<CSeq_feat> >& mrnas = context.FeatMRNAs();
+    for (size_t i = 0; i < cds.size(); i++) {
+        if (context.IsPseudo(*cds[i])) {
+            continue;
+        }
+        bool found = false;
+        string prod = GetProductForCDS(*cds[i], context.GetScope());
+        const CSeq_loc& loc_i = cds[i]->GetLocation();
+        for (size_t j = 0; j < mrnas.size(); j++) {
+            const CSeq_loc& loc_j = mrnas[j]->GetLocation();
+            sequence::ECompare compare = context.Compare(loc_j, loc_i);
+            if ((compare == sequence::eContains || compare == sequence::eSame) && IsProductMatch(prod, mrnas[j]->GetData().GetRna().GetRnaProductName())) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            m_Objs[kCDSWithoutMRNA].Add(*context.DiscrObj(*cds[i], true));
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(CDS_WITHOUT_MRNA)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+static bool AddmRNAForCDS(const CSeq_feat& cds, CScope& scope)
+{
+    CConstRef<CSeq_feat> old_mRNA = sequence::GetmRNAforCDS(cds, scope);
+    CRef<CSeq_feat> new_mRNA = edit::MakemRNAforCDS(cds, scope);
+
+    if (old_mRNA.Empty()) {
+        CSeq_feat_EditHandle cds_edit_handle(scope.GetSeq_featHandle(cds));
+        CSeq_annot_EditHandle annot_handle = cds_edit_handle.GetAnnot();
+        annot_handle.AddFeat(*new_mRNA);
+    }
+    else {
+        CSeq_feat_EditHandle old_mRNA_edit(scope.GetSeq_featHandle(*old_mRNA));
+        old_mRNA_edit.Replace(*new_mRNA);
+    }
+    return true;
+}
+
+
+DISCREPANCY_AUTOFIX(CDS_WITHOUT_MRNA)
+{
+    TReportObjectList list = item->GetDetails();
+    unsigned int n = 0;
+    NON_CONST_ITERATE(TReportObjectList, it, list) {
+        if ((*it)->CanAutofix()) {
+            const CSeq_feat* sf = dynamic_cast<const CSeq_feat*>(dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->GetObject().GetPointer());
+            if (sf && AddmRNAForCDS(*sf, scope)) {
+                n++;
+                dynamic_cast<CDiscrepancyObject*>((*it).GetNCPointer())->SetFixed();
+            }
+        }
+    }
+    return CRef<CAutofixReport>(n ? new CAutofixReport("CDS_WITHOUT_MRNA: Add mRNA for [n] CDS feature[s]", n) : 0);
+}
+
+
+// PROTEIN_NAMES
+
+DISCREPANCY_CASE(PROTEIN_NAMES, CSeq_feat, eDisc | eSubmitter | eSmart, "Frequently appearing proteins")
+{
+    if (obj.IsSetData() && obj.GetData().IsProt()) {
+        const CProt_ref& prot = obj.GetData().GetProt();
+        if (prot.IsSetName() && !prot.GetName().empty()) {
+            //string name = obj.GetData().GetProt().GetName().front();
+            m_Objs[obj.GetData().GetProt().GetName().front()].Incr();
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(PROTEIN_NAMES)
+{
+    static const size_t MIN_REPORTABLE_AMOUNT = 100;
+    auto& M = m_Objs.GetMap();
+    if (M.size() == 1 && M.begin()->second->GetCount() >= MIN_REPORTABLE_AMOUNT) {
+        CReportNode rep;
+        rep["All proteins have same name \"" + M.begin()->first + "\""];
+        m_ReportItems = rep.Export(*this)->GetSubitems();
+    }
+}
+
+
+// MRNA_SHOULD_HAVE_PROTEIN_TRANSCRIPT_IDS
+
+static bool IsmRnaQualsPresent(const CSeq_feat::TQual& quals)
+{
+    bool protein_id = false,
+         transcript_id = false;
+
+    ITERATE(CSeq_feat::TQual, qual, quals) {
+        if ((*qual)->IsSetQual()) {
+
+            if ((*qual)->GetQual() == "orig_protein_id") {
+                protein_id = true;
+            }
+
+            if ((*qual)->GetQual() == "orig_transcript_id") {
+                transcript_id = true;
+            }
+
+            if (protein_id && transcript_id) {
+                break;
+            }
+        }
+    }
+
+    return protein_id && transcript_id;
+}
+
+
+DISCREPANCY_CASE(MRNA_SHOULD_HAVE_PROTEIN_TRANSCRIPT_IDS, CSeq_feat, eDisc | eSubmitter | eSmart, "mRNA should have both protein_id and transcript_id")
+{
+    if (obj.IsSetData() && obj.GetData().IsCdregion() && !context.IsPseudo(obj) && context.IsEukaryotic() && context.IsDNA()) {
+        const CBioSource* bio_src = context.GetCurrentBiosource();
+        if (bio_src) {
+            CConstRef<CSeq_feat> mRNA = sequence::GetmRNAforCDS(obj, context.GetScope());
+            if (mRNA.NotEmpty()) {
+                if (!mRNA->IsSetQual() || !IsmRnaQualsPresent(mRNA->GetQual())) {
+                    m_Objs.Add(*context.DiscrObj(obj)).Fatal();
+                }
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(MRNA_SHOULD_HAVE_PROTEIN_TRANSCRIPT_IDS)
+{
+    if (!m_Objs.empty()) {
+        CReportNode out;
+        out["no protein_id and transcript_id present"];
+        m_ReportItems = out.Export(*this)->GetSubitems();
+    }
+}
+
+
+// FEATURE_LIST
+
+static const string kFeatureList = "Feature List";
+
+DISCREPANCY_CASE(FEATURE_LIST, CSeq_feat, eDisc, "Feature List")
+{
+    if (obj.IsSetData()) {
+        CSeqFeatData::ESubtype subtype = obj.GetData().GetSubtype();
+        if (subtype != CSeqFeatData::eSubtype_gap && subtype != CSeqFeatData::eSubtype_prot) {
+            string subitem = "[n] " + obj.GetData().GetKey();
+            subitem += " feature[s]";
+            m_Objs[kFeatureList].Info()[subitem].Info().Add(*context.DiscrObj(obj), false);
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(FEATURE_LIST)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+
+// MULTIPLE_QUALS
+
+static const string kMultiQuals = "[n] feature[s] contain[S] multiple /number qualifiers";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(MULTIPLE_QUALS, CSeq_feat, eDisc | eOncaller, "Multiple qualifiers")
+//  ----------------------------------------------------------------------------
+{
+    if (obj.IsSetQual()) {
+
+        size_t num_of_number_quals = 0;
+        ITERATE(CSeq_feat::TQual, qual, obj.GetQual()) {
+            if ((*qual)->IsSetQual() && (*qual)->GetQual() == "number") {
+                ++num_of_number_quals;
+                if (num_of_number_quals > 1) {
+                    break;
+                }
+            }
+        }
+
+        if (num_of_number_quals > 1) {
+            m_Objs[kMultiQuals].Add(*context.DiscrObj(obj), false);
+        }
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(MULTIPLE_QUALS)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+
+// MISC_FEATURE_WITH_PRODUCT_QUAL
+
+static const string kMiscFeatWithProduct = "[n] feature[s] [has] a product qualifier";
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_CASE(MISC_FEATURE_WITH_PRODUCT_QUAL, CSeq_feat, eDisc | eOncaller | eSubmitter | eSmart, "Misc features containing a product qualifier")
+//  ----------------------------------------------------------------------------
+{
+    if (obj.IsSetData() && obj.IsSetQual()) {
+
+        CSeqFeatData::ESubtype subtype = obj.GetData().GetSubtype();
+
+        if (subtype == CSeqFeatData::eSubtype_misc_feature) {
+
+            ITERATE(CSeq_feat::TQual, qual, obj.GetQual()) {
+                if ((*qual)->IsSetQual() && (*qual)->GetQual() == "product") {
+                    m_Objs[kMiscFeatWithProduct].Add(*context.DiscrObj(obj), false);
+                }
+            }
+        }
+    }
+}
+
+
+//  ----------------------------------------------------------------------------
+DISCREPANCY_SUMMARIZE(MISC_FEATURE_WITH_PRODUCT_QUAL)
+//  ----------------------------------------------------------------------------
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+
+// CDS_HAS_NO_ADJACENT_TRNA
+
+const string kCDShasNoTRNA = "[n] coding region[s] [does] not have adjacent tRNA";
+
+static bool IsStopCodon(const CCode_break::C_Aa& aa)
+{
+    int aa_idx = -1;
+    switch (aa.Which()) {
+    case CCode_break::C_Aa::e_Ncbieaa:
+        aa_idx = aa.GetNcbieaa();
+        aa_idx = CSeqportUtil::GetMapToIndex(CSeq_data::e_Ncbieaa, CSeq_data::e_Ncbistdaa, aa_idx);
+        break;
+    case CCode_break::C_Aa::e_Ncbi8aa:
+        aa_idx = aa.GetNcbi8aa();
+        break;
+    case CCode_break::C_Aa::e_Ncbistdaa:
+        aa_idx = aa.GetNcbistdaa();
+        break;
+    }
+    static const int STOP_CODON = 25;
+    return aa_idx == STOP_CODON;
+}
+
+
+DISCREPANCY_CASE(CDS_HAS_NO_ADJACENT_TRNA, COverlappingFeatures, eDisc, "CDSs should have adjacent tRNA")
+{
+    const CBioSource* biosrc = context.GetCurrentBiosource();
+    if (!biosrc || biosrc->GetGenome() != CBioSource::eGenome_mitochondrion) {
+        return;
+    }
+    const vector<CConstRef<CSeq_feat> >& cds = context.FeatCDS();
+    const vector<CConstRef<CSeq_feat> >& trnas = context.FeatTRNAs();
+    for (size_t i = 0; i < cds.size(); i++) {
+        if (!cds[i]->GetData().GetCdregion().IsSetCode_break()) {
+            continue;
+        }
+        const CCode_break& code_break = *cds[i]->GetData().GetCdregion().GetCode_break().front();
+        if (!code_break.IsSetAa() || !IsStopCodon(code_break.GetAa())) {
+            continue;
+        }
+        ENa_strand strand = cds[i]->GetLocation().IsSetStrand() ? cds[i]->GetLocation().GetStrand() : eNa_strand_unknown;
+        TSeqPos stop = cds[i]->GetLocation().GetStop(eExtreme_Biological);
+        const CSeq_feat* nearest_trna = nullptr;
+        TSeqPos diff = UINT_MAX;
+        ITERATE (vector<CConstRef<CSeq_feat>>, trna, trnas) {
+            if ((*trna)->IsSetLocation()) {
+                TSeqPos start = (*trna)->GetLocation().GetStart(eExtreme_Biological);
+                TSeqPos cur_diff = UINT_MAX;
+                if (strand == eNa_strand_minus) {
+                    if (start <= stop) {
+                        cur_diff = stop - start;
+                    }
+                }
+                else {
+                    if (start >= stop) {
+                        cur_diff = start - stop;
+                    }
+                }
+                if (cur_diff < diff) {
+                    diff = cur_diff;
+                    nearest_trna = *trna;
+                }
+            }
+        }
+        if (nearest_trna) {
+            ENa_strand trna_strand = nearest_trna->GetLocation().IsSetStrand() ? nearest_trna->GetLocation().GetStrand() : eNa_strand_unknown;
+            if (trna_strand == strand && diff > 1) {
+                m_Objs[kCDShasNoTRNA].Add(*context.DiscrObj(*cds[i]), false).Incr();
+                m_Objs[kCDShasNoTRNA].Add(*context.DiscrObj(*nearest_trna), false);
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(CDS_HAS_NO_ADJACENT_TRNA)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+// MITO_RRNA
+
+DISCREPANCY_CASE(MITO_RRNA, COverlappingFeatures, eOncaller, "Non-mitochondrial rRNAs with 12S/16S")
+{
+    if (context.IsEukaryotic()) {
+        const vector<CConstRef<CSeq_feat> >& rnas = context.Feat_RNAs();
+        for (size_t i = 0; i < rnas.size(); i++) {
+            if (rnas[i]->GetData().GetSubtype() == CSeqFeatData::eSubtype_rRNA && rnas[i]->GetData().GetRna().IsSetExt() && rnas[i]->GetData().GetRna().GetExt().IsName()) {
+                const string& name = rnas[i]->GetData().GetRna().GetExt().GetName();
+                if (name.find("16S") != string::npos || name.find("12S") != string::npos) {
+                    m_Objs["[n] non mitochondrial rRNA name[s] contain[S] 12S/16S"].Add(*context.DiscrObj(*rnas[i]));
+                }
+            }
+        }
+    }
+}
+
+
+DISCREPANCY_SUMMARIZE(MITO_RRNA)
+{
+    m_ReportItems = m_Objs.Export(*this)->GetSubitems();
+}
+
+
+END_SCOPE(NDiscrepancy)
+END_NCBI_SCOPE

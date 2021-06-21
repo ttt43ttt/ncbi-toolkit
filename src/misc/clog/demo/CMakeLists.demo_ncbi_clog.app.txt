@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.demo_ncbi_clog.app.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_app(demo_ncbi_clog)
+  NCBI_sources(demo_ncbi_clog)
+  NCBI_uses_toolkit_libraries(clog)
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()
+
+if(OFF)
+
+#
+#
+#
+add_executable(demo_ncbi_clog-app
+    demo_ncbi_clog
+)
+
+set_target_properties(demo_ncbi_clog-app PROPERTIES OUTPUT_NAME demo_ncbi_clog)
+
+target_link_libraries(demo_ncbi_clog-app
+    clog
+)
+endif()

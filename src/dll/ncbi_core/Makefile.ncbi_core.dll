@@ -1,0 +1,23 @@
+# $Id: Makefile.ncbi_core.dll 507790 2016-07-21 16:54:36Z ivanov $
+
+DLL = ncbi_core
+
+HOSTED_LIBS    = xncbi     \
+                 xcompress \
+                 tables    \
+                 sequtil   \
+                 creaders  \
+                 xregexp   \
+                 xdiff     \
+                 xutil     \
+                 xthrserv  \
+                 xconnserv \
+                 xxconnect \
+                 xconnect  \
+                 connect   \
+                 connssl   \
+                 xser      \
+                 xqueryparse
+
+CPPFLAGS = -DNCBI_CORE_EXPORTS
+

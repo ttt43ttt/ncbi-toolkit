@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.rpc_fail.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(ct100_rpc_fail)
+  NCBI_sources(rpc_fail common)
+  NCBI_add_test(test-ct100 --no-auto ct100_rpc_fail)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ct100_rpc_fail-app
+    rpc_fail common
+)
+
+set_target_properties(ct100_rpc_fail-app PROPERTIES OUTPUT_NAME ct100_rpc_fail)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE})
+
+target_link_libraries(ct100_rpc_fail-app
+    ct_ftds100
+)
+endif()

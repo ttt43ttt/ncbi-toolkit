@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.test_conn_tar.app.txt 568804 2018-08-10 16:44:01Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_conn_tar)
+  NCBI_sources(test_conn_tar)
+  NCBI_uses_toolkit_libraries(xcompress xconnect)
+  NCBI_project_watchers(lavr)
+  NCBI_set_test_assets(../../util/test/test_tar.sh ../../check/ncbi_test_data)
+  NCBI_add_test(test_conn_tar.sh)
+NCBI_end_app()
+
+
+if(OFF)
+#
+#
+#
+add_executable(test_conn_tar-app
+    test_conn_tar
+)
+
+set_target_properties(test_conn_tar-app PROPERTIES OUTPUT_NAME test_conn_tar)
+
+include_directories(SYSTEM ${CMPRS_INCLUDE})
+
+target_link_libraries(test_conn_tar-app
+    xcompress xconnect
+)
+endif()

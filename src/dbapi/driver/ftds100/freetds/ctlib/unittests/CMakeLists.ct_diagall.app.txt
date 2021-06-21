@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.ct_diagall.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(ct100_ct_diagall)
+  NCBI_sources(ct_diagall common)
+  NCBI_add_test(test-ct100 ct100_ct_diagall)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(ct100_ct_diagall-app
+    ct_diagall common
+)
+
+set_target_properties(ct100_ct_diagall-app PROPERTIES OUTPUT_NAME ct100_ct_diagall)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE})
+
+target_link_libraries(ct100_ct_diagall-app
+    ct_ftds100
+)
+endif()

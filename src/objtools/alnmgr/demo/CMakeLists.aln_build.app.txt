@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.aln_build.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(aln_build)
+  NCBI_sources(aln_build_app)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xalnmgr)
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(aln_build-app
+    aln_build_app
+)
+
+set_target_properties(aln_build-app PROPERTIES OUTPUT_NAME aln_build)
+
+target_link_libraries(aln_build-app
+    ncbi_xloader_genbank xalnmgr
+)
+endif()

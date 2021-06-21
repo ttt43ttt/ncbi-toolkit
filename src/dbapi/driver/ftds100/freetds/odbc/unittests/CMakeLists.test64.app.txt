@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.test64.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_test64)
+  NCBI_sources(test64 common)
+  NCBI_add_test(test-odbc100 odbc100_test64)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_test64-app
+    test64 common
+)
+
+set_target_properties(odbc100_test64-app PROPERTIES OUTPUT_NAME odbc100_test64)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_test64-app
+    odbc_ftds100
+)
+endif()

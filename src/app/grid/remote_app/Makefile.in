@@ -1,0 +1,9 @@
+# $Id: Makefile.in 545644 2017-09-08 14:48:58Z sadyrovr $
+
+# Meta-makefile ("remote_app" program)
+#################################
+
+APP_PROJ = remote_app ns_submit_remote_job ns_remote_job_control remote_cgi
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

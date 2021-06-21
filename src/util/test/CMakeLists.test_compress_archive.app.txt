@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_compress_archive.app.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_compress_archive)
+  NCBI_sources(test_compress_archive)
+  NCBI_uses_toolkit_libraries(xcompress)
+  NCBI_project_watchers(ivanov)
+  NCBI_add_test(test_compress_archive test all)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_compress_archive-app
+    test_compress_archive
+)
+
+set_target_properties(test_compress_archive-app PROPERTIES OUTPUT_NAME test_compress_archive)
+
+target_link_libraries(test_compress_archive-app
+    xcompress
+)
+endif()

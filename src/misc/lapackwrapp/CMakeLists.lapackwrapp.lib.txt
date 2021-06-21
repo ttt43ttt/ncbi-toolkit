@@ -1,0 +1,21 @@
+#############################################################################
+# $Id: CMakeLists.lapackwrapp.lib.txt 565539 2018-06-13 16:19:50Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(lapackwrapp)
+  NCBI_sources(ncbi_lapack)
+  NCBI_project_watchers(ucko)
+NCBI_end_lib()
+
+if(OFF)
+
+add_library(lapackwrapp
+    ncbi_lapack
+)
+
+include_directories(SYSTEM ${LAPACK_INCLUDE})
+
+target_link_libraries(lapackwrapp
+    ${LAPACK_LIBS}
+)
+endif()

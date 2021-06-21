@@ -1,0 +1,31 @@
+#############################################################################
+# $Id: CMakeLists.trackmgrgridcli.lib.txt 564454 2018-05-29 13:35:44Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(trackmgrgridcli)
+  NCBI_sources(
+    tms_exception blast_client displaytrack_client
+    createusertrack_client createremotetrack_client removeusertrack_client
+    item_resolver_client switch_context_client track_attrvalue_client
+    trackset_client createtrackset_client
+    supported_assemblies_client
+  )
+  NCBI_uses_toolkit_libraries(trackmgr xcompress xconnserv)
+  NCBI_project_watchers(meric clausen)
+NCBI_end_lib()
+
+
+if(OFF)
+#
+#
+#
+add_library(trackmgrgridcli
+    tms_exception blast_client displaytrack_client createusertrack_client
+    removeusertrack_client item_resolver_client switch_context_client
+    track_attrvalue_client
+)
+
+target_link_libraries(trackmgrgridcli
+    trackmgr xcompress xconnserv
+)
+endif()

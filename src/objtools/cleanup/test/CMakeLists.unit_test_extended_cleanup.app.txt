@@ -1,0 +1,30 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_extended_cleanup.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_extended_cleanup)
+  NCBI_sources(unit_test_extended_cleanup)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xcleanup xunittestutil)
+  NCBI_project_watchers(bollin kans)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(unit_test_extended_cleanup-app
+    unit_test_extended_cleanup
+)
+
+set_target_properties(unit_test_extended_cleanup-app PROPERTIES OUTPUT_NAME unit_test_extended_cleanup)
+
+
+
+target_link_libraries(unit_test_extended_cleanup-app
+    ncbi_xloader_genbank test_boost xcleanup
+    xunittestutil
+)
+endif()
+

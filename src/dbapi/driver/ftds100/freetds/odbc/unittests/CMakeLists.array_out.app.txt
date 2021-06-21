@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.array_out.app.txt 573635 2018-10-30 15:55:37Z ivanov $
+#############################################################################
+
+NCBI_begin_app(odbc100_array_out)
+  NCBI_sources(array_out common)
+  NCBI_add_test(test-odbc100 odbc100_array_out)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(odbc100_array_out-app
+    array_out common
+)
+
+set_target_properties(odbc100_array_out-app PROPERTIES OUTPUT_NAME odbc100_array_out)
+
+include_directories(SYSTEM ${FTDS100_INCLUDE} ${ODBC_INCLUDE})
+
+target_link_libraries(odbc100_array_out-app
+    odbc_ftds100
+)
+endif()

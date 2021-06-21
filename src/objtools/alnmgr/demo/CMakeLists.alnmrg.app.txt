@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.alnmrg.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(alnmrg)
+  NCBI_sources(alnmrg)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_blastdb ncbi_xloader_genbank xalnmgr xobjread)
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(alnmrg-app
+    alnmrg
+)
+
+set_target_properties(alnmrg-app PROPERTIES OUTPUT_NAME alnmrg)
+
+target_link_libraries(alnmrg-app
+    ncbi_xloader_blastdb ncbi_xloader_genbank xalnmgr
+    xobjread
+)
+endif()

@@ -1,0 +1,6 @@
+# $Id: Makefile.in 423404 2014-01-03 16:17:20Z gotvyans $
+
+APP_PROJ = tableval
+srcdir = @srcdir@
+
+include @builddir@/Makefile.meta

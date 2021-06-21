@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(asnvalidate-app
+    asnval
+)
+
+set_target_properties(asnvalidate-app PROPERTIES OUTPUT_NAME asnvalidate)
+
+target_link_libraries(asnvalidate-app
+    data_loaders_util xmlwrapp xvalidate
+)
+

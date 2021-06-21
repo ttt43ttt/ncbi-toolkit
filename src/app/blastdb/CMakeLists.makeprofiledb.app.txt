@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(makeprofiledb-app
+    makeprofiledb
+)
+
+set_target_properties(makeprofiledb-app PROPERTIES OUTPUT_NAME makeprofiledb)
+
+target_link_libraries(makeprofiledb-app
+    blastinput writedb
+)
+

@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.seq_entry_reassign_ids.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(seq_entry_reassign_ids)
+  NCBI_sources(seq_entry_reassign_ids)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(seqset)
+  NCBI_project_watchers(vasilche)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(seq_entry_reassign_ids-app
+    seq_entry_reassign_ids
+)
+
+set_target_properties(seq_entry_reassign_ids-app PROPERTIES OUTPUT_NAME seq_entry_reassign_ids)
+
+
+target_link_libraries(seq_entry_reassign_ids-app
+    seqset test_boost
+)
+endif()

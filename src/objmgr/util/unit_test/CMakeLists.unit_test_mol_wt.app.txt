@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_mol_wt.app.txt 565603 2018-06-14 13:44:37Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_mol_wt)
+  NCBI_sources(unit_test_mol_wt)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(test_boost xobjutil)
+  NCBI_project_watchers(ucko dicuccio)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(unit_test_mol_wt-app
+    unit_test_mol_wt
+)
+
+set_target_properties(unit_test_mol_wt-app PROPERTIES OUTPUT_NAME unit_test_mol_wt)
+
+
+
+target_link_libraries(unit_test_mol_wt-app
+    test_boost xobjutil
+)
+endif()

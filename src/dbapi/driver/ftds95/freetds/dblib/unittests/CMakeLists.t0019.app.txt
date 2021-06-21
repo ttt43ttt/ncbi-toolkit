@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.t0019.app.txt 566367 2018-06-28 12:41:46Z gouriano $
+#############################################################################
+
+NCBI_begin_app(db95_t0019)
+  NCBI_sources(t0019 common)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(db95_t0019-app
+    t0019 common
+)
+
+set_target_properties(db95_t0019-app PROPERTIES OUTPUT_NAME db95_t0019)
+
+include_directories(SYSTEM ${FTDS95_INCLUDE})
+
+target_link_libraries(db95_t0019-app
+    sybdb_ftds95 ${FTDS95_CTLIB_LIBS}
+     ${RT_LIBS} ${C_LIBS} 
+)
+endif()

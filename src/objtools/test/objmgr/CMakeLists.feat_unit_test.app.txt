@@ -1,0 +1,28 @@
+#############################################################################
+# $Id: CMakeLists.feat_unit_test.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(feat_unit_test)
+  NCBI_sources(feat_unit_test)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(xobjutil ncbi_xloader_genbank)
+  NCBI_project_watchers(vasilche)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(feat_unit_test-app
+    feat_unit_test
+)
+
+set_target_properties(feat_unit_test-app PROPERTIES OUTPUT_NAME feat_unit_test)
+
+
+
+target_link_libraries(feat_unit_test-app
+    xobjutil ncbi_xloader_genbank test_boost
+)
+endif()

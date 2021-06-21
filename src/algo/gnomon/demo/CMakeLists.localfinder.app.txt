@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.localfinder.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(localfinder)
+  NCBI_sources(local_finder)
+  NCBI_uses_toolkit_libraries(xalgognomon xobjread)
+  NCBI_project_watchers(chetvern)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(localfinder-app
+    local_finder
+)
+
+set_target_properties(localfinder-app PROPERTIES OUTPUT_NAME localfinder)
+
+target_link_libraries(localfinder-app
+    xalgognomon xobjread
+)
+endif()

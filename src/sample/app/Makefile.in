@@ -1,0 +1,13 @@
+# $Id: Makefile.in 561643 2018-04-10 17:46:28Z fukanchi $
+
+# Meta-makefile
+#################################
+
+SUB_PROJ = \
+   basic cgi deployable_cgi dbapi objects objmgr alnmgr soap lds netschedule netcache blast \
+   asn eutils unit_test serial sdbapi http_session multicmd
+
+REQUIRES = app
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

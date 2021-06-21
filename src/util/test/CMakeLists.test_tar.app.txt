@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.test_tar.app.txt 568555 2018-08-07 16:43:28Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_tar)
+  NCBI_sources(test_tar)
+  NCBI_uses_toolkit_libraries(xcompress)
+  NCBI_project_watchers(lavr)
+  NCBI_set_test_timeout(600)
+  NCBI_add_test(test_tar.sh)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_tar-app
+    test_tar
+)
+
+set_target_properties(test_tar-app PROPERTIES OUTPUT_NAME test_tar)
+
+include_directories(SYSTEM ${CMPRS_INCLUDE})
+
+target_link_libraries(test_tar-app
+    xcompress
+)
+endif()

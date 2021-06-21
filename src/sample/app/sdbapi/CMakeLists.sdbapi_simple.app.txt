@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(sdbapi_simple-app
+    sdbapi_simple
+)
+
+set_target_properties(sdbapi_simple-app PROPERTIES OUTPUT_NAME sdbapi_simple)
+
+target_link_libraries(sdbapi_simple-app
+    ${SDBAPI_LIB} xconnect  
+     
+)
+

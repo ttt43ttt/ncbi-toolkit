@@ -1,0 +1,18 @@
+#############################################################################
+# $Id: CMakeLists.fastme.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(fastme)
+  NCBI_sources(NNI bNNI bme fastme gme graph heap inputs newickstring traverse)
+  NCBI_uses_external_libraries(${ORIG_LIBS})
+  NCBI_project_watchers(jcherry gorelenk)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(fastme
+    NNI bNNI bme fastme gme graph heap inputs newickstring traverse
+)
+endif()

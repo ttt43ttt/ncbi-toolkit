@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.test_user_agent.app.txt 564553 2018-05-30 14:04:12Z gouriano $
+#############################################################################
+
+
+NCBI_begin_app(test_user_agent)
+  NCBI_sources(test_user_agent)
+  NCBI_uses_toolkit_libraries(xcgi)
+  NCBI_add_test()
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(test_user_agent-app
+    test_user_agent
+)
+
+set_target_properties(test_user_agent-app PROPERTIES OUTPUT_NAME test_user_agent)
+
+target_link_libraries(test_user_agent-app
+    xcgi
+)
+endif()

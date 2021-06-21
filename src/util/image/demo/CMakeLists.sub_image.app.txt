@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.sub_image.app.txt 563863 2018-05-16 14:50:58Z gouriano $
+#############################################################################
+
+NCBI_begin_app(sub_image)
+  NCBI_sources(sub_image)
+  NCBI_uses_toolkit_libraries(ximage)
+  NCBI_project_watchers(dicuccio)
+NCBI_end_app()
+
+
+if(OFF)
+#
+#
+#
+add_executable(sub_image-app
+    sub_image
+)
+
+set_target_properties(sub_image-app PROPERTIES OUTPUT_NAME sub_image)
+
+target_link_libraries(sub_image-app
+    ximage
+)
+endif()
+

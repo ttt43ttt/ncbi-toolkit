@@ -1,0 +1,22 @@
+#############################################################################
+# $Id: CMakeLists.xstruct_dp.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xstruct_dp)
+  NCBI_sources(block_align)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_project_watchers(thiessen)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xstruct_dp
+    block_align
+)
+
+target_link_libraries(xstruct_dp
+    xncbi
+)
+endif()

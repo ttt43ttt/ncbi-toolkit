@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.xalntool.lib.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xalntool)
+  NCBI_sources(alngraphic)
+  NCBI_uses_toolkit_libraries(align_format)
+  NCBI_project_watchers(jianye)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xalntool
+    alngraphic
+)
+add_dependencies(xalntool
+    seqset
+)
+
+target_link_libraries(xalntool
+    align_format
+)
+endif()

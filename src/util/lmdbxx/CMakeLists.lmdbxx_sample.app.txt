@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.lmdbxx_sample.app.txt 564072 2018-05-21 13:16:53Z gouriano $
+#############################################################################
+
+NCBI_begin_app(lmdbxx_sample)
+  NCBI_sources(example.cpp)
+  NCBI_add_include_directories(${includedir}/util/lmdbxx)
+  NCBI_project_tags(demo)
+  NCBI_project_watchers(ivanov)
+NCBI_end_app()
+
+if(OFF)
+add_executable(lmdbxx_sample-app
+    example.cpp
+)
+
+set_target_properties(lmdbxx_sample-app PROPERTIES OUTPUT_NAME lmdbxx_sample)
+
+include_directories(SYSTEM ${includedir}/util/lmdbxx ${LMDB_INCLUDE})
+
+target_link_libraries(lmdbxx_sample-app
+    ${LMDB_LIBS}
+)
+endif()

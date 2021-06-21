@@ -1,0 +1,13 @@
+#
+#
+#
+add_executable(deltablast-app
+    deltablast_app
+)
+
+set_target_properties(deltablast-app PROPERTIES OUTPUT_NAME deltablast)
+
+target_link_libraries(deltablast-app
+    blast_app_util
+)
+

@@ -1,0 +1,8 @@
+# $Id: Makefile.in 476648 2015-08-20 19:37:47Z vasilche $
+
+PROJ_TAG = test
+
+APP_PROJ = sra_test vdb_test wgs_test csra_test_mt graph_test snp_test
+
+srcdir = @srcdir@
+include @builddir@/Makefile.meta

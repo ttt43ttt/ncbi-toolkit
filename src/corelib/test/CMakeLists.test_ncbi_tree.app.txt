@@ -1,0 +1,27 @@
+#############################################################################
+# $Id: CMakeLists.test_ncbi_tree.app.txt 567661 2018-07-23 12:51:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(test_ncbi_tree)
+  NCBI_sources(test_ncbi_tree)
+  NCBI_uses_toolkit_libraries(xncbi)
+  NCBI_add_test()
+  NCBI_project_watchers(grichenk)
+NCBI_end_app()
+
+if(OFF)
+
+
+add_executable(test_ncbi_tree-app
+    test_ncbi_tree
+)
+
+set_target_properties(test_ncbi_tree-app PROPERTIES OUTPUT_NAME test_ncbi_tree)
+
+target_link_libraries(test_ncbi_tree-app
+    xncbi
+)
+
+add_test(NAME test_ncbi_tree-app
+         COMMAND $<TARGET_FILE:test_ncbi_tree-app>)
+endif()

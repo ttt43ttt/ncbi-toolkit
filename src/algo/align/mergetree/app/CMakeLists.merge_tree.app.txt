@@ -1,0 +1,16 @@
+#############################################################################
+# $Id: CMakeLists.merge_tree.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(merge_tree)
+  NCBI_sources(merge_tree_app)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xmergetree)
+NCBI_end_app()
+
+if(OFF)
+add_executable(merge_tree merge_tree_app)
+
+target_link_libraries(merge_tree
+    ncbi_xloader_genbank xmergetree
+)
+endif()

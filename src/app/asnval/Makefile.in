@@ -1,0 +1,6 @@
+# $Id: Makefile.in 394494 2013-04-03 16:42:12Z ucko $
+
+APP_PROJ = asnval
+srcdir = @srcdir@
+
+include @builddir@/Makefile.meta

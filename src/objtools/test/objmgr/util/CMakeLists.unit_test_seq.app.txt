@@ -1,0 +1,29 @@
+#############################################################################
+# $Id: CMakeLists.unit_test_seq.app.txt 566390 2018-06-28 17:11:39Z gouriano $
+#############################################################################
+
+NCBI_begin_app(unit_test_seq)
+  NCBI_sources(unit_test_seq)
+  NCBI_requires(Boost.Test.Included)
+  NCBI_uses_toolkit_libraries(ncbi_xloader_genbank xobjutil)
+  NCBI_project_watchers(vasilche)
+  NCBI_add_test()
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(unit_test_seq-app
+    unit_test_seq
+)
+
+set_target_properties(unit_test_seq-app PROPERTIES OUTPUT_NAME unit_test_seq)
+
+
+
+target_link_libraries(unit_test_seq-app
+    ncbi_xloader_genbank test_boost xobjutil
+)
+endif()
+

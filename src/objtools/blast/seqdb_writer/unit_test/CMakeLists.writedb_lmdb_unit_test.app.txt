@@ -1,0 +1,12 @@
+#############################################################################
+# $Id: CMakeLists.writedb_lmdb_unit_test.app.txt 566420 2018-06-28 19:43:32Z gouriano $
+#############################################################################
+
+NCBI_begin_app(writedb_lmdb_unit_test)
+  NCBI_sources(writedb_lmdb_unit_test)
+  NCBI_add_definitions(NCBI_MODULE=BLASTDB)
+  NCBI_uses_toolkit_libraries(test_boost writedb)
+  NCBI_project_watchers(madden camacho fongah2 boratyng rackerst)
+  NCBI_add_test()
+NCBI_end_app()
+

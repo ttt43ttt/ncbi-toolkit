@@ -1,0 +1,25 @@
+#############################################################################
+# $Id: CMakeLists.xalgosegmask.lib.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_lib(xalgosegmask)
+  NCBI_sources(segmask)
+  NCBI_uses_toolkit_libraries(blast xobjmgr seqset)
+  NCBI_project_watchers(blastsoft)
+NCBI_end_lib()
+
+if(OFF)
+#
+#
+#
+add_library(xalgosegmask
+    segmask
+)
+add_dependencies(xalgosegmask
+    seqset
+)
+
+target_link_libraries(xalgosegmask
+    blast xobjmgr
+)
+endif()

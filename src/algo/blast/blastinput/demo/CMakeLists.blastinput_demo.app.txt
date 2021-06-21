@@ -1,0 +1,24 @@
+#############################################################################
+# $Id: CMakeLists.blastinput_demo.app.txt 566834 2018-07-09 12:39:41Z gouriano $
+#############################################################################
+
+NCBI_begin_app(blastinput_demo)
+  NCBI_sources(blastinput_demo)
+  NCBI_uses_toolkit_libraries(blastinput)
+  NCBI_project_watchers(madden camacho)
+NCBI_end_app()
+
+if(OFF)
+#
+#
+#
+add_executable(blastinput_demo-app
+    blastinput_demo
+)
+
+set_target_properties(blastinput_demo-app PROPERTIES OUTPUT_NAME blastinput_demo)
+
+target_link_libraries(blastinput_demo-app
+    blastinput
+)
+endif()

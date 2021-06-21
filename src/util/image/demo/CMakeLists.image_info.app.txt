@@ -1,0 +1,26 @@
+#############################################################################
+# $Id: CMakeLists.image_info.app.txt 563863 2018-05-16 14:50:58Z gouriano $
+#############################################################################
+
+NCBI_begin_app(image_info)
+  NCBI_sources(image_info)
+  NCBI_uses_toolkit_libraries(ximage)
+  NCBI_project_watchers(dicuccio)
+NCBI_end_app()
+
+
+if(OFF)
+#
+#
+#
+add_executable(image_info-app
+    image_info
+)
+
+set_target_properties(image_info-app PROPERTIES OUTPUT_NAME image_info)
+
+target_link_libraries(image_info-app
+    ximage
+)
+endif()
+

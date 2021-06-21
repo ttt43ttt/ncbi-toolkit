@@ -1,0 +1,14 @@
+#
+#
+#
+add_executable(bioseq_edit_sample-app
+    bioseq_edit_sample file_db_engine
+)
+
+set_target_properties(bioseq_edit_sample-app PROPERTIES OUTPUT_NAME bioseq_edit_sample)
+
+target_link_libraries(bioseq_edit_sample-app
+    ncbi_xloader_patcher ${OBJMGR_LIBS} 
+     
+)
+
